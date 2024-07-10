@@ -27,7 +27,6 @@ function addEventListenersToPacks() {
         
         // Add event listener to the button
         button.addEventListener('click', () => {
-          console.log(`${packName} opened`);
           handlePackOpened(packName); // Call the function to handle pack opening
         });
       }
@@ -45,7 +44,46 @@ function addEventListenersToPacks() {
       openedPacks.push(packName);
       localStorage.setItem('openedPacks', JSON.stringify(openedPacks));
     }
-  }
+
+    // Wait for the pack animation to finish so that the pack contents are visible
+    waitForPackAnimation();
+    
+    const packItems = document.querySelectorAll('.entityContainer')
+    packItems.forEach(item => {
+        // Extract the pack name from the closest `ut-store-pack-details-view` container
+        const rating = player.querySelector('.rating').textContent;
+        if (!rating){
+            return
+        } else {
+            const name = player.querySelector('.name').textContent;
+            const pac = player.querySelector('.slot-position + ul .label[value="PAC"]').nextElementSibling.textContent;
+            const sho = player.querySelector('.slot-position + ul .label[value="SHO"]').nextElementSibling.textContent;
+            const pas = player.querySelector('.slot-position + ul .label[value="PAS"]').nextElementSibling.textContent;
+            const dri = player.querySelector('.slot-position + ul .label[value="DRI"]').nextElementSibling.textContent;
+            const def = player.querySelector('.slot-position + ul .label[value="DEF"]').nextElementSibling.textContent;
+            const phy = player.querySelector('.slot-position + ul .label[value="PHY"]').nextElementSibling.textContent;
+            const isTradeable = !player.closest('.untradeable');
+            const isDuplicate = player.closest('.duplicate') ? true : false;
+            
+            console.log({
+                name,
+                rating,
+                pac,
+                sho,
+                pas,
+                dri,
+                def,
+                phy,
+                isTradeable,
+                isDuplicate
+            });
+
+        }
+
+        
+        
+      });
+    }
   
   // Create a MutationObserver to watch for changes in the DOM
   const observer = new MutationObserver(() => {
@@ -61,4 +99,3 @@ function addEventListenersToPacks() {
   // Initial call in case the elements are already present
   addEventListenersToPacks();
 
-  
