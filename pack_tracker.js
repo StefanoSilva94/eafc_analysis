@@ -29,7 +29,7 @@ function addEventListenersToPacks() {
             // Delay the execution of handlePackOpened by 5 seconds
             setTimeout(() => {
                 handlePackOpened(packName); // Call the function to handle pack opening
-            }, 5000); // 5000 milliseconds = 5 seconds
+            }, 7000); // 5000 milliseconds = 5 seconds
         });
       }
     });
@@ -51,6 +51,7 @@ function addEventListenersToPacks() {
     // waitForPackAnimation();
     
     const packItems = document.querySelectorAll('.entityContainer')
+    console.log(`Pack Items Length: ${packItems.length}`);
     packItems.forEach(item => {
         // Extract the pack name from the closest `ut-store-pack-details-view` container
         const rating = item.querySelector('.rating').textContent;
@@ -61,7 +62,7 @@ function addEventListenersToPacks() {
             const isTradeable = !item.closest('.untradeable');
             const isDuplicate = item.closest('.duplicate') ? true : false;
             
-            const labels = player.querySelectorAll('.player-stats-data-component .label');
+            const labels = item.querySelectorAll('.player-stats-data-component .label');
 
             let pacValue = null;
             let shoValue = null;
@@ -97,12 +98,12 @@ function addEventListenersToPacks() {
             console.log({
                 name,
                 rating,
-                pac,
-                sho,
-                pas,
-                dri,
-                def,
-                phy,
+                pac: pacValue,
+                sho: shoValue,
+                pas: pasValue,
+                dri: driValue,
+                def: defValue,
+                phy: phyValue,
                 isTradeable,
                 isDuplicate
             });
