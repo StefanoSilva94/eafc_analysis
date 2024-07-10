@@ -16,7 +16,6 @@ function addEventListenersToPacks() {
       const packName = packNameElement ? packNameElement.textContent.trim() : 'Unknown Pack';
   
       // Use a unique identifier for each pack to ensure listeners are only added once
-    //   const uniqueId = detailsView.querySelector('h1.ut-store-pack-details-view--title span').textContent.trim() + button.outerHTML;
       
       // Check if the event listener is already added
       if (!button.dataset.listenerAdded) {
@@ -27,7 +26,10 @@ function addEventListenersToPacks() {
         
         // Add event listener to the button
         button.addEventListener('click', () => {
-          handlePackOpened(packName); // Call the function to handle pack opening
+            // Delay the execution of handlePackOpened by 5 seconds
+            setTimeout(() => {
+                handlePackOpened(packName); // Call the function to handle pack opening
+            }, 5000); // 5000 milliseconds = 5 seconds
         });
       }
     });
@@ -46,25 +48,52 @@ function addEventListenersToPacks() {
     }
 
     // Wait for the pack animation to finish so that the pack contents are visible
-    waitForPackAnimation();
+    // waitForPackAnimation();
     
     const packItems = document.querySelectorAll('.entityContainer')
     packItems.forEach(item => {
         // Extract the pack name from the closest `ut-store-pack-details-view` container
-        const rating = player.querySelector('.rating').textContent;
+        const rating = item.querySelector('.rating').textContent;
         if (!rating){
             return
         } else {
-            const name = player.querySelector('.name').textContent;
-            const pac = player.querySelector('.slot-position + ul .label[value="PAC"]').nextElementSibling.textContent;
-            const sho = player.querySelector('.slot-position + ul .label[value="SHO"]').nextElementSibling.textContent;
-            const pas = player.querySelector('.slot-position + ul .label[value="PAS"]').nextElementSibling.textContent;
-            const dri = player.querySelector('.slot-position + ul .label[value="DRI"]').nextElementSibling.textContent;
-            const def = player.querySelector('.slot-position + ul .label[value="DEF"]').nextElementSibling.textContent;
-            const phy = player.querySelector('.slot-position + ul .label[value="PHY"]').nextElementSibling.textContent;
-            const isTradeable = !player.closest('.untradeable');
-            const isDuplicate = player.closest('.duplicate') ? true : false;
+            const name = item.querySelector('.name').textContent;
+            const isTradeable = !item.closest('.untradeable');
+            const isDuplicate = item.closest('.duplicate') ? true : false;
             
+            const labels = player.querySelectorAll('.player-stats-data-component .label');
+
+            let pacValue = null;
+            let shoValue = null;
+            let pasValue = null;
+            let driValue = null;
+            let defValue = null;
+            let phyValue = null;
+
+            labels.forEach(label => {
+                const labelText = label.textContent.trim();
+                switch (labelText) {
+                    case 'PAC':
+                        pacValue = label.nextElementSibling.textContent.trim();
+                        break;
+                    case 'SHO':
+                        shoValue = label.nextElementSibling.textContent.trim();
+                        break;
+                    case 'PAS':
+                        pasValue = label.nextElementSibling.textContent.trim();
+                        break;
+                    case 'DRI':
+                        driValue = label.nextElementSibling.textContent.trim();
+                        break;
+                    case 'DEF':
+                        defValue = label.nextElementSibling.textContent.trim();
+                        break;
+                    case 'PHY':
+                        phyValue = label.nextElementSibling.textContent.trim();
+                        break;
+                }
+            });
+
             console.log({
                 name,
                 rating,
