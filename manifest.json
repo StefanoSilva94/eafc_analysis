@@ -1,0 +1,27 @@
+{
+    "manifest_version": 3,
+    "name": "FIFA Pack Tracker",
+    "version": "1.06",
+    "description": "Track and store stats of pack pulls on the EAFC Web App.",
+    "permissions": [
+        "storage",
+        "activeTab",
+        "scripting"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            
+        }
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://www.ea.com/*"],
+            "js": ["pack_tracker.js"],
+            "run_at": "document_end"
+        }
+    ]
+}
