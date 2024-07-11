@@ -59,9 +59,19 @@ function addEventListenersToPacks() {
             return
         } else {
             const name = item.querySelector('.name').textContent;
-            const isTradeable = !item.closest('.untradeable');
-            const isDuplicate = item.closest('.duplicate') ? true : false;
-            
+            const isTradeable = !item.closest('.name .untradeable');
+
+            // Check for the parent element of the section and use closest to find the Title section
+            // Check the text content of the title element to see if it is main 'Item' or 'Duplicates'
+            const headerElement = item.closest('.sectioned-item-list');
+            const titleElement = headerElement.querySelector('.title');
+            console.log(`${titleElement} has been opened with text ${titleElement.textContent}`);
+
+            let isDuplicate = false;
+            if (titleElement && titleElement.textContent === 'Duplicates') {
+                isDuplicate = true;
+            }
+                
             const labels = item.querySelectorAll('.player-stats-data-component .label');
 
             let pacValue = null;
