@@ -16,7 +16,6 @@ function addEventListenersToPacks() {
       const packName = packNameElement ? packNameElement.textContent.trim() : 'Unknown Pack';
   
       // Use a unique identifier for each pack to ensure listeners are only added once
-    //   const uniqueId = detailsView.querySelector('h1.ut-store-pack-details-view--title span').textContent.trim() + button.outerHTML;
       
       // Check if the event listener is already added
       if (!button.dataset.listenerAdded) {
@@ -27,8 +26,10 @@ function addEventListenersToPacks() {
         
         // Add event listener to the button
         button.addEventListener('click', () => {
-          console.log(`${packName} opened`);
-          handlePackOpened(packName); // Call the function to handle pack opening
+            // Delay the execution of handlePackOpened by 5 seconds
+            setTimeout(() => {
+                handlePackOpened(packName); // Call the function to handle pack opening
+            }, 7000); // 5000 milliseconds = 5 seconds
         });
       }
     });
@@ -45,7 +46,86 @@ function addEventListenersToPacks() {
       openedPacks.push(packName);
       localStorage.setItem('openedPacks', JSON.stringify(openedPacks));
     }
-  }
+
+    // Wait for the pack animation to finish so that the pack contents are visible
+    // waitForPackAnimation();
+    
+    const packItems = document.querySelectorAll('.entityContainer')
+    console.log(`Pack Items Length: ${packItems.length}`);
+    packItems.forEach(item => {
+        // Extract the pack name from the closest `ut-store-pack-details-view` container
+        const rating = item.querySelector('.rating').textContent;
+        if (!rating){
+            return
+        } else {
+            const name = item.querySelector('.name').textContent;
+            const position = item.querySelector('.position').textContent;
+            const isTradeable = item.querySelector('.untradeable') ? false : true;
+
+            // Check for the parent element of the section and use closest to find the Title section
+            // Check the text content of the title element to see if it is main 'Item' or 'Duplicates'
+            const headerElement = item.closest('.sectioned-item-list');
+            const titleElement = headerElement.querySelector('.title');
+            console.log(`${titleElement} has been opened with text ${titleElement.textContent}`);
+
+            let isDuplicate = false;
+            if (titleElement && titleElement.textContent === 'Duplicates') {
+                isDuplicate = true;
+            }
+                
+            const labels = item.querySelectorAll('.player-stats-data-component .label');
+
+            let pacValue = null;
+            let shoValue = null;
+            let pasValue = null;
+            let driValue = null;
+            let defValue = null;
+            let phyValue = null;
+
+            labels.forEach(label => {
+                const labelText = label.textContent.trim();
+                switch (labelText) {
+                    case 'PAC':
+                        pacValue = label.nextElementSibling.textContent.trim();
+                        break;
+                    case 'SHO':
+                        shoValue = label.nextElementSibling.textContent.trim();
+                        break;
+                    case 'PAS':
+                        pasValue = label.nextElementSibling.textContent.trim();
+                        break;
+                    case 'DRI':
+                        driValue = label.nextElementSibling.textContent.trim();
+                        break;
+                    case 'DEF':
+                        defValue = label.nextElementSibling.textContent.trim();
+                        break;
+                    case 'PHY':
+                        phyValue = label.nextElementSibling.textContent.trim();
+                        break;
+                }
+            });
+
+            console.log({
+                name,
+                rating,
+                position,
+                pac: pacValue,
+                sho: shoValue,
+                pas: pasValue,
+                dri: driValue,
+                def: defValue,
+                phy: phyValue,
+                isTradeable,
+                isDuplicate
+            });
+
+        }
+
+        
+        
+      });
+    }
   
   // Create a MutationObserver to watch for changes in the DOM
   const observer = new MutationObserver(() => {
@@ -61,4 +141,3 @@ function addEventListenersToPacks() {
   // Initial call in case the elements are already present
   addEventListenersToPacks();
 
-  
