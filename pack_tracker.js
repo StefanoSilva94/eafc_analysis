@@ -59,7 +59,8 @@ function addEventListenersToPacks() {
             return
         } else {
             const name = item.querySelector('.name').textContent;
-            const isTradeable = !item.closest('.name .untradeable');
+            const position = item.querySelector('.position').textContent;
+            const isTradeable = item.querySelector('.untradeable') ? false : true;
 
             // Check for the parent element of the section and use closest to find the Title section
             // Check the text content of the title element to see if it is main 'Item' or 'Duplicates'
@@ -108,6 +109,7 @@ function addEventListenersToPacks() {
             console.log({
                 name,
                 rating,
+                position,
                 pac: pacValue,
                 sho: shoValue,
                 pas: pasValue,
