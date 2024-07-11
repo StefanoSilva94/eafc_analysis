@@ -2,9 +2,10 @@
 
 This is a personal project to track data on EA FC Ultimate Team web app. A chrome extension is used to passively track the items from opened packs. Currently, this is just printed to the console. In future updates it will include uploading the information to a server and storing it on a database. Data Analysis will then be performed on the results.
 
-**Setup Guide
-****Chrome Extension - Fifa Pack Tracker
-**Prerequisites:
+
+**Chrome Extension - Fifa Pack Tracker- Set Up**
+
+Prerequisites:
 - Access to the the FC24 webapp
 - Access to Google Chrome
 - eafc_analysis project is cloned onto your machine
