@@ -5,11 +5,21 @@ import logging
 from .database import get_db, engine
 from . import crud, models, schemas
 from sqlalchemy.orm import Session
+from fastapi.middleware.cors import CORSMiddleware
 
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# Set up CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins, you can restrict this to specific domains
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods, including OPTIONS
+    allow_headers=["*"],  # Allows all headers
+)
 
 logging.basicConfig(level=logging.INFO)
 

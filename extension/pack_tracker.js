@@ -37,95 +37,174 @@ function addEventListenersToPacks() {
   
   // Function to handle the logic when a pack is opened
   function handlePackOpened(packName) {
-    // Print message to the console
     console.log(`${packName} has been opened`);
-  
+
     // Save the opened pack name in localStorage
     let openedPacks = JSON.parse(localStorage.getItem('openedPacks')) || [];
     if (!openedPacks.includes(packName)) {
-      openedPacks.push(packName);
-      localStorage.setItem('openedPacks', JSON.stringify(openedPacks));
+        openedPacks.push(packName);
+        localStorage.setItem('openedPacks', JSON.stringify(openedPacks));
     }
 
-    // Wait for the pack animation to finish so that the pack contents are visible
+    // Wait for the pack animation to finish
     // waitForPackAnimation();
-    
-    const packItems = document.querySelectorAll('.entityContainer')
+
+    const packItems = document.querySelectorAll('.entityContainer');
     console.log(`Pack Items Length: ${packItems.length}`);
+
     packItems.forEach(item => {
-        // Extract the pack name from the closest `ut-store-pack-details-view` container
-        const rating = item.querySelector('.rating').textContent;
-        if (!rating){
-            return
+        const rating = item.querySelector('.rating')?.textContent.trim();
+        if (!rating) return;
+
+        const name = item.querySelector('.name')?.textContent.trim();
+        const position = item.querySelector('.position')?.textContent.trim();
+        const is_tradeable = !item.querySelector('.untradeable');
+
+        // Determine if item is a duplicate
+        const headerElement = item.closest('.sectioned-item-list');
+        const titleElement = headerElement?.querySelector('.title');
+        const is_duplicate = titleElement?.textContent.trim() === 'Duplicates';
+
+        // Initialize item object
+        let itemData = {
+            pack_name: packName,
+            name,
+            rating,
+            position,
+            is_tradeable,
+            is_duplicate
+        };
+
+        // Populate attributes based on player position
+        if (position === "GK") {
+            itemData = { ...itemData, ...extractGoalkeeperAttributes(item) };
         } else {
-            const name = item.querySelector('.name').textContent;
-            const position = item.querySelector('.position').textContent;
-            const isTradeable = item.querySelector('.untradeable') ? false : true;
-
-            // Check for the parent element of the section and use closest to find the Title section
-            // Check the text content of the title element to see if it is main 'Item' or 'Duplicates'
-            const headerElement = item.closest('.sectioned-item-list');
-            const titleElement = headerElement.querySelector('.title');
-            console.log(`${titleElement} has been opened with text ${titleElement.textContent}`);
-
-            let isDuplicate = false;
-            if (titleElement && titleElement.textContent === 'Duplicates') {
-                isDuplicate = true;
-            }
-                
-            const labels = item.querySelectorAll('.player-stats-data-component .label');
-
-            let pacValue = null;
-            let shoValue = null;
-            let pasValue = null;
-            let driValue = null;
-            let defValue = null;
-            let phyValue = null;
-
-            labels.forEach(label => {
-                const labelText = label.textContent.trim();
-                switch (labelText) {
-                    case 'PAC':
-                        pacValue = label.nextElementSibling.textContent.trim();
-                        break;
-                    case 'SHO':
-                        shoValue = label.nextElementSibling.textContent.trim();
-                        break;
-                    case 'PAS':
-                        pasValue = label.nextElementSibling.textContent.trim();
-                        break;
-                    case 'DRI':
-                        driValue = label.nextElementSibling.textContent.trim();
-                        break;
-                    case 'DEF':
-                        defValue = label.nextElementSibling.textContent.trim();
-                        break;
-                    case 'PHY':
-                        phyValue = label.nextElementSibling.textContent.trim();
-                        break;
-                }
-            });
-
-            console.log({
-                name,
-                rating,
-                position,
-                pac: pacValue,
-                sho: shoValue,
-                pas: pasValue,
-                dri: driValue,
-                def: defValue,
-                phy: phyValue,
-                isTradeable,
-                isDuplicate
-            });
-
+            itemData = { ...itemData, ...extractOutfieldPlayerAttributes(item) };
         }
 
-        
-        
-      });
-    }
+        console.log("Item object:", itemData);
+        console.log("JSON.stringify(item):", JSON.stringify(itemData));
+
+        sendDataToBackend(itemData);
+    });
+}
+
+function extractOutfieldPlayerAttributes(item) {
+    const labels = item.querySelectorAll('.player-stats-data-component .label');
+    const attributes = {
+        pace: null,
+        shooting: null,
+        passing: null,
+        dribbling: null,
+        defending: null,
+        physical: null
+    };
+
+    labels.forEach(label => {
+        const labelText = label.textContent.trim();
+        const value = label.nextElementSibling?.textContent.trim();
+        switch (labelText) {
+            case 'PAC':
+                attributes.pace = value;
+                break;
+            case 'SHO':
+                attributes.shooting = value;
+                break;
+            case 'PAS':
+                attributes.passing = value;
+                break;
+            case 'DRI':
+                attributes.dribbling = value;
+                break;
+            case 'DEF':
+                attributes.defending = value;
+                break;
+            case 'PHY':
+                attributes.physical = value;
+                break;
+        }
+    });
+
+    return attributes;
+}
+
+function extractGoalkeeperAttributes(item) {
+    const labels = item.querySelectorAll('.player-stats-data-component .label');
+    const attributes = {
+        diving: null,
+        handling: null,
+        kicking: null,
+        speed: null,
+        reflexes: null,
+        positioning: null
+    };
+
+    labels.forEach(label => {
+        const labelText = label.textContent.trim();
+        const value = label.nextElementSibling?.textContent.trim();
+        switch (labelText) {
+            case 'DIV':
+                attributes.diving = value;
+                break;
+            case 'HAN':
+                attributes.handling = value;
+                break;
+            case 'KIC':
+                attributes.kicking = value;
+                break;
+            case 'SPD':
+                attributes.speed = value;
+                break;
+            case 'REF':
+                attributes.reflexes = value;
+                break;
+            case 'POS':
+                attributes.positioning = value;
+                break;
+        }
+    });
+
+    return attributes;
+}
+
+
+    async function sendDataToBackend(item) {
+      // Log the item being sent to the backend
+      console.log("Sending item to backend:", item);
+  
+      try {
+          // Send the request
+          const response = await fetch('http://localhost:8000/new_item/', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(item)
+          });
+  
+          // Check if the response is OK
+          if (response.ok) {
+              // Log successful response
+              console.log("Data sent successfully!");
+              
+              // Optional: log the response body if needed
+              const responseBody = await response.json();
+              console.log("Response body:", responseBody);
+          } else {
+              // Log failed response status and text
+              console.error("Failed to send data. Status:", response.status);
+              console.error("Status Text:", response.statusText);
+  
+              // Optional: log the response body to get more details
+              const responseBody = await response.text();
+              console.error("Response body:", responseBody);
+          }
+      } catch (error) {
+          // Log any errors encountered during the fetch
+          console.error("Error sending data:", error);
+      }
+  }
+  
   
   // Create a MutationObserver to watch for changes in the DOM
   const observer = new MutationObserver(() => {
