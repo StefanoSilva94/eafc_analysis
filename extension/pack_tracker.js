@@ -52,6 +52,9 @@ function addEventListenersToPacks() {
     const packItems = document.querySelectorAll('.entityContainer');
     console.log(`Pack Items Length: ${packItems.length}`);
 
+    // Array to hold all item data
+    let itemsData = [];
+
     packItems.forEach(item => {
         const rating = item.querySelector('.rating')?.textContent.trim();
         if (!rating) return;
@@ -85,9 +88,14 @@ function addEventListenersToPacks() {
         console.log("Item object:", itemData);
         console.log("JSON.stringify(item):", JSON.stringify(itemData));
 
-        sendDataToBackend(itemData);
+        // Add item to itemsData array
+        itemsData.push(itemData);
     });
+
+    // Send the array of items to the backend
+    sendBatchDataToBackend({ pack_name: packName, items: itemsData });
 }
+
 
 function extractOutfieldPlayerAttributes(item) {
     const labels = item.querySelectorAll('.player-stats-data-component .label');
@@ -168,42 +176,61 @@ function extractGoalkeeperAttributes(item) {
 }
 
 
-    async function sendDataToBackend(item) {
-      // Log the item being sent to the backend
-      console.log("Sending item to backend:", item);
-  
-      try {
-          // Send the request
-          const response = await fetch('http://localhost:8000/new_item/', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(item)
-          });
-  
-          // Check if the response is OK
-          if (response.ok) {
-              // Log successful response
-              console.log("Data sent successfully!");
-              
-              // Optional: log the response body if needed
-              const responseBody = await response.json();
-              console.log("Response body:", responseBody);
-          } else {
-              // Log failed response status and text
-              console.error("Failed to send data. Status:", response.status);
-              console.error("Status Text:", response.statusText);
-  
-              // Optional: log the response body to get more details
-              const responseBody = await response.text();
-              console.error("Response body:", responseBody);
-          }
-      } catch (error) {
-          // Log any errors encountered during the fetch
-          console.error("Error sending data:", error);
-      }
-  }
+
+function sendBatchDataToBackend(batchData) {
+    fetch('http://localhost:8000/new_items/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(batchData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Batch data successfully sent to the backend:', data);
+    })
+    .catch((error) => {
+        console.error('Error sending batch data to the backend:', error);
+    });
+}
+
+
+async function sendDataToBackend(item) {
+    // Log the item being sent to the backend
+    console.log("Sending item to backend:", item);
+
+    try {
+        // Send the request
+        const response = await fetch('http://localhost:8000/new_item/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(item)
+        });
+
+        // Check if the response is OK
+        if (response.ok) {
+            // Log successful response
+            console.log("Data sent successfully!");
+            
+            // Optional: log the response body if needed
+            const responseBody = await response.json();
+            console.log("Response body:", responseBody);
+        } else {
+            // Log failed response status and text
+            console.error("Failed to send data. Status:", response.status);
+            console.error("Status Text:", response.statusText);
+
+            // Optional: log the response body to get more details
+            const responseBody = await response.text();
+            console.error("Response body:", responseBody);
+        }
+    } catch (error) {
+        // Log any errors encountered during the fetch
+        console.error("Error sending data:", error);
+    }
+}
   
   
   // Create a MutationObserver to watch for changes in the DOM

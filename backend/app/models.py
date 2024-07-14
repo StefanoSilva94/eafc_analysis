@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 class Item(Base):
     __tablename__ = "packed_items"
     id = Column(Integer, primary_key=True, index=True, nullable=False, autoincrement=True)
+    pack_id = Column(Integer, ForeignKey('packs.id'), nullable=False)  # Foreign key to packs table
     pack_name = Column(String)  
     name = Column(String, index=True)
     rating = Column(String)  
@@ -28,3 +29,13 @@ class Item(Base):
     reflexes = Column(String, nullable=True)
     positioning = Column(String, nullable=True)
 
+    pack = relationship("Pack", back_populates="items")
+
+
+class Pack(Base):
+    __tablename__ = "packs"
+    id = Column(Integer, primary_key=True, index=True, nullable=False, autoincrement=True)
+    pack_name = Column(String, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=False), server_default=text('now()'))
+
+    items = relationship("Item", back_populates="pack")
