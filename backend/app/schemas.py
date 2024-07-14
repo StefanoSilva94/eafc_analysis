@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 
 
@@ -32,10 +32,13 @@ class ItemBase(BaseModel):
 class ItemCreate(ItemBase):
     pass
 
-
+class ItemCreateBatch(BaseModel):
+    items: List[ItemCreate]
+    pack_name: str
 
 class ItemRead(ItemBase):
     id: int
+    pack_id: int
     created_at: datetime
 
     class Config:
