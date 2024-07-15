@@ -1,8 +1,36 @@
+function addEventListenersToPicks() {
+    // Select all buttons and find the one with the specific text
+    const redeemButton = Array.from(document.querySelectorAll('button'))
+        .find(button => button.querySelector('.btn-text')?.textContent.trim() === 'Redeem Player Picks Item');
+
+    if (redeemButton) {
+        // Find the closest parent element that contains the pick name
+        const detailPanel = redeemButton.closest('.DetailPanel');
+        const pickNameElement = detailPanel?.querySelector('.subHeading');
+        const pickName = pickNameElement ? pickNameElement.textContent.trim() : 'Unknown Pick';
+
+        if (!redeemButton.dataset.listenerAdded) {
+            redeemButton.dataset.listenerAdded = 'true'; // Mark as having the listener added
+
+            console.log(`Added an event listener to pick: ${pickName}`);
+
+            // Add click event listener to the Redeem button
+            redeemButton.addEventListener('click', () => {
+                // Delay the execution of handlePackOpened by 1 second
+                setTimeout(() => {
+                    handlePickOpened(pickName); // Call the function to handle pack opening
+                }, 1000); // 1000 milliseconds = 1 second
+            });
+        }
+    } 
+}
+
+
+
+
 function addEventListenersToPacks() {
     // Get all Open buttons on the page
     const openButtons = document.querySelectorAll('button.currency.call-to-action');
-    console.log(`Open buttons has ${openButtons.length} elements`);
-
   
     openButtons.forEach(button => {
       // Extract the pack name from the closest `ut-store-pack-details-view` container
@@ -15,13 +43,11 @@ function addEventListenersToPacks() {
       const packNameElement = detailsView.querySelector('h1.ut-store-pack-details-view--title span');
       const packName = packNameElement ? packNameElement.textContent.trim() : 'Unknown Pack';
   
-      // Use a unique identifier for each pack to ensure listeners are only added once
       
-      // Check if the event listener is already added
+      // If no listener is added, mark the listener as added
       if (!button.dataset.listenerAdded) {
-        button.dataset.listenerAdded = 'true'; // Mark as having the listener added
+        button.dataset.listenerAdded = 'true';
   
-        // Print to console that the event listener was added
         console.log(`Added an event listener to pack: ${packName}`);
         
         // Add event listener to the button
@@ -94,6 +120,11 @@ function addEventListenersToPacks() {
 
     // Send the array of items to the backend
     sendBatchDataToBackend({ pack_name: packName, items: itemsData });
+}
+
+function handlePickOpened(pickName) {
+    console.log(`${pickName} has been picked`);
+    // Your logic for handling opened picks
 }
 
 
@@ -234,16 +265,21 @@ async function sendDataToBackend(item) {
   
   
   // Create a MutationObserver to watch for changes in the DOM
-  const observer = new MutationObserver(() => {
+  const observerCallback = (mutationsList, observer) => {
+    // Call both functions to handle packs and picks
     addEventListenersToPacks();
-  });
-  
-  // Start observing the document body for changes
-  observer.observe(document.body, {
+    addEventListenersToPicks();
+};
+
+// Create a MutationObserver instance
+const observer = new MutationObserver(observerCallback);
+
+// Start observing the document body for changes
+observer.observe(document.body, {
     childList: true,
     subtree: true
-  });
+});
   
   // Initial call in case the elements are already present
-  addEventListenersToPacks();
+//   addEventListenersToPacks();
 
