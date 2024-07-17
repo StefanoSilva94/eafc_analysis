@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
+from typing import Union
 
 def add_items(db: Session, item: schemas.ItemCreate):
     db_item = models.Item(**item.model_dump())
@@ -9,7 +10,7 @@ def add_items(db: Session, item: schemas.ItemCreate):
     return db_item
 
 
-def add_items_batch(db: Session, items_batch: schemas.ItemCreateBatch):
+def add_items_batch(db: Session, items_batch: Union[schemas.ItemCreateBatch, schemas.PlayerPickCreateBatch], type='pack'):
     # Create a new pack
     pack = models.Pack(pack_name=items_batch.pack_name)
     db.add(pack)
@@ -20,11 +21,20 @@ def add_items_batch(db: Session, items_batch: schemas.ItemCreateBatch):
     db_items = []
     for item in items_batch.items:
         item_dict = item.model_dump()
+        
         item_dict['pack_id'] = pack.id  # Assign the pack ID to each item
-        # for item in item_dict:
-        #     print(f"Item: {item}, type = {type(item_dict[item])}")
-        db_items.append(models.Item(**item_dict))
-    
+        print(f'This is the item: {item_dict}')
+
+        # db_items.append(models.Item(**item_dict))
+
+        if type == 'pick':
+            
+            # item_dict['pick_name'] = item_dict['pack_name']
+            # print(f'This is the updated item: {item_dict}')
+            db_items.append(models.PlayerPick(**item_dict))
+        else:
+            db_items.append(models.Item(**item_dict))
+
     db.add_all(db_items)
     db.commit()
     for db_item in db_items:

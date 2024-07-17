@@ -32,6 +32,16 @@ class ItemBase(BaseModel):
 class ItemCreate(ItemBase):
     pass
 
+class PlayerPickBase(ItemBase):
+    pass
+
+class PlayerPickCreate(PlayerPickBase):
+    is_selected: bool
+
+class PlayerPickCreateBatch(BaseModel):
+    items: List[PlayerPickCreate]
+    pack_name: str
+
 class ItemCreateBatch(BaseModel):
     items: List[ItemCreate]
     pack_name: str
@@ -40,6 +50,16 @@ class ItemRead(ItemBase):
     id: int
     pack_id: int
     created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class PlayerPickRead(PlayerPickBase):
+    id: int
+    pack_id: int
+    created_at: datetime
+    is_selected: bool
 
     class Config:
         from_attributes = True
