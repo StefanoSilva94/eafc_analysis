@@ -1,8 +1,110 @@
+function addEventListenersToPicks() {
+    // Select all buttons and find the one with the specific text
+    const redeemButton = Array.from(document.querySelectorAll('button'))
+        .find(button => button.querySelector('.btn-text')?.textContent.trim() === 'Redeem Player Picks Item');
+
+    if (redeemButton) {
+        // Find the closest parent element that contains the pick name
+        const detailPanel = redeemButton.closest('.DetailPanel');
+        const pickNameElement = detailPanel?.querySelector('.subHeading');
+        const pickName = pickNameElement ? pickNameElement.textContent.trim() : 'Unknown Pick';
+
+        if (!redeemButton.dataset.listenerAdded) {
+            redeemButton.dataset.listenerAdded = 'true'; // Mark as having the listener added
+
+            console.log(`Added an event listener to pick: ${pickName}`);
+
+            // Add click event listener to the Redeem button
+            redeemButton.addEventListener('click', () => {
+                // Delay the execution of handlePickOpened by 1 second
+                setTimeout(() => {
+                    handlePickOpened(pickName); // Call the function to handle pack opening
+                }, 1000); // 1000 milliseconds = 1 second
+            });
+
+            
+        }
+    } 
+}
+
+function addEventListenersToPickItems(itemsData, pickItems, packName) {
+    itemsData.forEach((item, idx) => {
+        item.is_selected = (idx === 0); // First item is true, others are false
+    });
+
+    // Add event listeners to the items of the player pick to see which one is selected
+    pickItems.forEach((pick, index) => {
+        if (!pick.dataset.listenerAdded) {
+            pick.dataset.listenerAdded = 'true';
+
+            console.log(`Added an event listener to player: ${pick.querySelector('.name')?.textContent.trim()}`);
+
+            // Add event listener to the pick item
+            pick.addEventListener('click', () => {
+                // Update isSelected values
+                const activePlayer = extractKeyPlayerAttributes(pick, 'pick');
+                itemsData.forEach((item, idx) => {
+                    item.is_selected = (index === idx);
+                });
+
+                console.log(`Updated items data:`, itemsData);
+            });
+        }
+    });
+
+    // Flag to ensure that API request is sent only once
+    let apiRequestSent = false;
+
+    // Function to handle the success detection
+    const detectSuccess = () => {
+        if (apiRequestSent) return; // Exit if the API request has already been sent
+
+        const rewardsCarousel = document.querySelector('.rewards-carousel');
+        if (rewardsCarousel) {
+            console.log('Success element detected.');
+            console.log(`Updated items data:`, itemsData);
+
+            if (packName) {
+                apiRequestSent = true; // Set flag to prevent further API requests
+                sendBatchDataToBackend({ pack_name: packName, items: itemsData }, 'http://localhost:8000/new_picks/');
+
+                playerPickObserver.disconnect(); // Disconnect the observer once the success element is found
+            } else {
+                console.error('packName is not defined.');
+            }
+        }
+    };
+
+    // Create a MutationObserver instance
+    const playerPickObserver = new MutationObserver((mutationsList, observer) => {
+        for (const mutation of mutationsList) {
+            if (mutation.type === 'childList' || mutation.type === 'subtree') {
+                detectSuccess();
+            }
+        }
+    });
+
+    // Start observing the document body for changes
+    playerPickObserver.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    // Set a timeout to stop observing after 10 seconds if the element is not found
+    setTimeout(() => {
+        playerPickObserver.disconnect();
+        console.log("Observer timed out after 10 seconds");
+    }, 10000);
+
+    console.log("We have finished addEventListenersToPickItems function");
+    return itemsData;
+}
+
+
+
 function addEventListenersToPacks() {
     // Get all Open buttons on the page
     const openButtons = document.querySelectorAll('button.currency.call-to-action');
-    console.log(`Open buttons has ${openButtons.length} elements`);
-
   
     openButtons.forEach(button => {
       // Extract the pack name from the closest `ut-store-pack-details-view` container
@@ -15,13 +117,11 @@ function addEventListenersToPacks() {
       const packNameElement = detailsView.querySelector('h1.ut-store-pack-details-view--title span');
       const packName = packNameElement ? packNameElement.textContent.trim() : 'Unknown Pack';
   
-      // Use a unique identifier for each pack to ensure listeners are only added once
       
-      // Check if the event listener is already added
+      // If no listener is added, mark the listener as added
       if (!button.dataset.listenerAdded) {
-        button.dataset.listenerAdded = 'true'; // Mark as having the listener added
+        button.dataset.listenerAdded = 'true';
   
-        // Print to console that the event listener was added
         console.log(`Added an event listener to pack: ${packName}`);
         
         // Add event listener to the button
@@ -61,12 +161,12 @@ function addEventListenersToPacks() {
 
         const name = item.querySelector('.name')?.textContent.trim();
         const position = item.querySelector('.position')?.textContent.trim();
-        const is_tradeable = !item.querySelector('.untradeable');
+        const isTradeable = !item.querySelector('.untradeable');
 
         // Determine if item is a duplicate
         const headerElement = item.closest('.sectioned-item-list');
         const titleElement = headerElement?.querySelector('.title');
-        const is_duplicate = titleElement?.textContent.trim() === 'Duplicates';
+        const isDuplicate = titleElement?.textContent.trim() === 'Duplicates';
 
         // Initialize item object
         let itemData = {
@@ -74,8 +174,8 @@ function addEventListenersToPacks() {
             name,
             rating,
             position,
-            is_tradeable,
-            is_duplicate
+            is_tradeable: isTradeable,
+            is_duplicate: isDuplicate
         };
 
         // Populate attributes based on player position
@@ -93,7 +193,128 @@ function addEventListenersToPacks() {
     });
 
     // Send the array of items to the backend
-    sendBatchDataToBackend({ pack_name: packName, items: itemsData });
+    sendBatchDataToBackend({ pack_name: packName, items: itemsData }, 'http://localhost:8000/new_items/');
+}
+
+function handlePickOpened(pickName) {
+    // Store each pick in pickItems
+    // Iterate through each pick and store the data of each pick
+    // Add a click event for each pick and for the Confirm button
+    // If click is selected on Pick, update isSelected value for each item
+    // Else confrim is clicked, send data to database
+
+    console.log(`Player Pick: ${pickName} has been opened`);
+    
+    const pickItems = document.querySelectorAll(".player-pick-option");
+    console.log(`Pick Items Length: ${pickItems.length}`);
+
+    // Array to hold all item data
+    let itemsData = [];
+
+    pickItems.forEach(item => {
+        // Get the players name, rating, position, isTradeable, isDuplicate
+        let itemData = extractKeyPlayerAttributes(item, 'pick');
+        itemData.pack_name = pickName
+        const position = itemData.position
+        // Populate attributes based on player position
+        if (position === "GK") {
+            const diving = item.querySelector(".Pace.statValue").textContent.trim();
+            const handling = item.querySelector(".Shooting.statValue").textContent.trim();
+            const kicking = item.querySelector(".Passing.statValue").textContent.trim();
+            const reflexes = item.querySelector(".Dribbling.statValue").textContent.trim();
+            const speed = item.querySelector(".Defending.statValue").textContent.trim();
+            const positioning = item.querySelector(".Header.statValue").textContent.trim();
+            itemData = {
+                ...itemData,
+                diving,
+                handling,
+                kicking,
+                reflexes,
+                speed,
+                positioning
+            };
+        } else {
+            const shooting = item.querySelector(".Shooting.statValue").textContent.trim();
+            const dribbling = item.querySelector(".Dribbling.statValue").textContent.trim();
+            const passing = item.querySelector(".Passing.statValue").textContent.trim();
+            const pace = item.querySelector(".Pace.statValue").textContent.trim();
+            const defending = item.querySelector(".Defending.statValue").textContent.trim();
+            const physical = item.querySelector(".Header.statValue").textContent.trim();
+            itemData = {
+                ...itemData,
+                shooting,
+                dribbling,
+                passing,
+                pace,
+                defending,
+                physical
+            };
+        }
+
+        // Add item to itemsData array
+        itemsData.push(itemData);
+
+    })
+    // Add event listener to each pick to see which one is selectedand currently active
+    // When the Confirm button is clicked it will add the value: isSelected to that player
+    itemsData = addEventListenersToPickItems(itemsData, pickItems, pickName)
+    console.log('Item all data:', itemsData);
+
+}
+
+function updateActivePlayer(pickItems) {
+    pickItems.forEach(pick => {
+        activeElement = pick.querySelector('.player-pick-option.selected')
+        if (activeElement) {
+            return extractKeyPlayerAttributes(pick)
+        }
+    })
+}
+
+
+function extractKeyPlayerAttributes(item, type) {
+    const rating = item.querySelector('.rating')?.textContent.trim();
+    if (!rating) return null; // Return null if rating is not found
+
+    const name = item.querySelector('.name')?.textContent.trim();
+    const position = item.querySelector('.position')?.textContent.trim();
+    let isTradeable;
+    let isDuplicate = false;
+    
+    if (type === 'pick') {
+        const pickElement = item.parentElement;
+        console.log('this is the pickElement: ', pickElement);
+        const spanElements = pickElement.querySelectorAll('span')
+        spanElements.forEach(span => {
+            if (span.textContent.trim() === 'Already Owned') {
+                console.log('this is the chosen one: ', span);
+                
+                // Check if the span element has style="display: none;"
+                if (span.style.display === 'none') {
+                    isDuplicate = false; // Set isDuplicate to false
+                } else {
+                    isDuplicate = true; // Otherwise, set isDuplicate to true
+                }
+                return; // Exit forEach loop early since we found the span element
+            }
+        });
+        isTradeable = false; // Always set isTradeable to false
+    }
+     else if (type === 'pack') {
+        // Add logic for determining isDuplicate for packs if needed
+        isDuplicate = false; // Default to false if no specific logic is provided
+        isTradeable = !item.querySelector('.untradeable')
+    }
+
+    const itemData = {
+        name,
+        rating,
+        position,
+        is_tradeable: isTradeable,
+        is_duplicate: isDuplicate,
+    };
+
+    return itemData;
 }
 
 
@@ -177,8 +398,8 @@ function extractGoalkeeperAttributes(item) {
 
 
 
-function sendBatchDataToBackend(batchData) {
-    fetch('http://localhost:8000/new_items/', {
+function sendBatchDataToBackend(batchData, url) {
+    fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -233,17 +454,22 @@ async function sendDataToBackend(item) {
 }
   
   
-  // Create a MutationObserver to watch for changes in the DOM
-  const observer = new MutationObserver(() => {
+// Create a MutationObserver to watch for changes in the DOM
+const observerCallback = (mutationsList, observer) => {
+    // Call both functions to handle packs and picks
     addEventListenersToPacks();
-  });
-  
-  // Start observing the document body for changes
-  observer.observe(document.body, {
+    addEventListenersToPicks();
+};
+
+// Create a MutationObserver instance
+const observer = new MutationObserver(observerCallback);
+
+// Start observing the document body for changes
+observer.observe(document.body, {
     childList: true,
     subtree: true
-  });
+});
   
   // Initial call in case the elements are already present
-  addEventListenersToPacks();
+//   addEventListenersToPacks();
 
