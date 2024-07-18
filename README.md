@@ -32,8 +32,7 @@ FC24 Pack Tracker is a Chrome extension and backend system designed to track and
 
 1. **Clone the repository**:
     ```bash
-    git clone https://github.com/your-username/fc24-pack-tracker.git
-    cd fc24-pack-tracker/extension
+    git clone https://github.com/stefanosilva94/eafc_analysis.git
     ```
 
 2. **Load the extension**:
@@ -43,10 +42,9 @@ FC24 Pack Tracker is a Chrome extension and backend system designed to track and
 
 ### Backend
 
-1. **Clone the repository**:
+1. **Clone the repository (If not already done)**:
     ```bash
-    git clone https://github.com/your-username/fc24-pack-tracker.git
-    cd fc24-pack-tracker/backend
+    git clone https://github.com/stefanosilva94/eafc_analysis.git
     ```
 
 2. **Set up a virtual environment**:
@@ -63,7 +61,7 @@ FC24 Pack Tracker is a Chrome extension and backend system designed to track and
 4. **Configure the environment variables**:
     Create a `.env` file in the `backend` directory and add the following:
     ```
-    DATABASE_URL=postgresql://user:password@localhost/dbname
+    DATABASE_URL=postgresql+psycopg://user:password@localhost/dbname
     ```
 
 5. **Run the backend server**:
@@ -92,36 +90,4 @@ FC24 Pack Tracker is a Chrome extension and backend system designed to track and
 - **GET /packed_items/{id}**: Retrieve a specific packed item by ID.
 - **POST /packed_items**: Add new packed item data.
 
-## Database Schema
 
-### Packs Table
-
-| Column    | Type    | Description              |
-|-----------|---------|--------------------------|
-| id        | Integer | Primary key              |
-| name      | String  | Name of the pack         |
-| type      | String  | Type of the pack         |
-| opened_at | DateTime| Timestamp of opening     |
-
-### Packed Items Table
-
-| Column        | Type    | Description               |
-|---------------|---------|---------------------------|
-| id            | Integer | Primary key               |
-| pack_id       | Integer | Foreign key to Packs      |
-| name          | String  | Name of the item          |
-| rating        | Integer | Rating of the item        |
-| position      | String  | Position of the item      |
-| is_tradeable  | Boolean | Tradeable status          |
-| is_duplicate  | Boolean | Duplicate status          |
-
-## Contributing
-
-1. Fork the repository.
-2. Create a new branch for your feature or bugfix.
-3. Make your changes.
-4. Submit a pull request with a detailed description of your changes.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
