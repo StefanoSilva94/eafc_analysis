@@ -14,11 +14,7 @@ FC24 Pack Tracker is a Chrome extension and backend system designed to track and
     - [Chrome Extension Usage](#chrome-extension-usage)
     - [Backend Usage](#backend-usage)
 4. [API Endpoints](#api-endpoints)
-5. [Database Schema](#database-schema)
-    - [Packs Table](#packs-table)
-    - [Packed Items Table](#packed-items-table)
-6. [Contributing](#contributing)
-7. [License](#license)
+
 
 ## Features
 
