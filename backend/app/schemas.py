@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Optional, List
 
 
-
 class ItemBase(BaseModel):
     name: str
     pack_name: str

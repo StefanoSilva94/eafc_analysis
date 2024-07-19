@@ -1,13 +1,9 @@
-from fastapi import FastAPI, Depends, HTTPException
-from typing import Union, List
-from pydantic import BaseModel
+from fastapi import FastAPI
 import logging
 
-from .database import get_db, engine
-from . import crud, models, schemas, utils
-from sqlalchemy.orm import Session
+from .database import engine
+from . import models
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import status
 from .routers import packs, users, picks, auth
 
 
