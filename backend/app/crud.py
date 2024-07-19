@@ -20,17 +20,11 @@ def add_items_batch(db: Session, items_batch: Union[schemas.ItemCreateBatch, sch
     # Create items with the generated pack_id
     db_items = []
     for item in items_batch.items:
-        item_dict = item.model_dump()
-        
-        item_dict['pack_id'] = pack.id  # Assign the pack ID to each item
-        print(f'This is the item: {item_dict}')
 
-        # db_items.append(models.Item(**item_dict))
+        item_dict = item.model_dump()
+        item_dict['pack_id'] = pack.id  # Assign the pack ID to each item
 
         if type == 'pick':
-            
-            # item_dict['pick_name'] = item_dict['pack_name']
-            # print(f'This is the updated item: {item_dict}')
             db_items.append(models.PlayerPick(**item_dict))
         else:
             db_items.append(models.Item(**item_dict))
