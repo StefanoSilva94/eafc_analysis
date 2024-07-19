@@ -2,6 +2,7 @@ from .database import Base
 from sqlalchemy import create_engine, Boolean, Column, ForeignKey, Integer, String, TIMESTAMP
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import relationship
+from pydantic import EmailStr
 
 class Item(Base):
     __tablename__ = "packed_items"
@@ -69,3 +70,11 @@ class PlayerPick(Base):
     positioning = Column(String, nullable=True)
 
     pack = relationship("Pack", back_populates="picks")
+
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True, nullable=False, autoincrement=True)
+    email = Column(String, nullable=False, unique=True)
+    password = Column(String, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=False), server_default=text('now()'))
