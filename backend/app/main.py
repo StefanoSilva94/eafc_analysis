@@ -8,7 +8,7 @@ from . import crud, models, schemas, utils
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import status
-from .routers import packs, users, picks
+from .routers import packs, users, picks, auth
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -30,6 +30,8 @@ logging.basicConfig(level=logging.INFO)
 app.include_router(packs.router)
 app.include_router(picks.router)
 app.include_router(users.router)
+app.include_router(auth.router)
+
 print('hello world')
 
 
