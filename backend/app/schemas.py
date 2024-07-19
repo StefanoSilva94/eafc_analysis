@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional, List
 
@@ -35,12 +35,15 @@ class ItemCreate(ItemBase):
 class PlayerPickBase(ItemBase):
     pass
 
+
 class PlayerPickCreate(PlayerPickBase):
     is_selected: bool
+
 
 class PlayerPickCreateBatch(BaseModel):
     items: List[PlayerPickCreate]
     pack_name: str
+
 
 class ItemCreateBatch(BaseModel):
     items: List[ItemCreate]
@@ -60,6 +63,20 @@ class PlayerPickRead(PlayerPickBase):
     pack_id: int
     created_at: datetime
     is_selected: bool
+
+    class Config:
+        from_attributes = True
+
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+    created_at: datetime
 
     class Config:
         from_attributes = True
