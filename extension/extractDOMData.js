@@ -57,10 +57,11 @@ function extractKeyPlayerAttributes(item, type) {
 
 /**
  * Helper function to extract attributes from labels based on a mapping.
+ * @param {HTMLElement} item - the htmlelement of the pack item
  * @param {Object} attributeMappings - The mapping of attribute names to label text.
  * @returns {Object} - The extracted attributes.
  */
-function getAttributesFromLabels(attributeMappings) {
+function getAttributesFromLabels(item, attributeMappings) {
     const attributes = {};
     const labels = item.querySelectorAll('.player-stats-data-component .label');
 
@@ -89,7 +90,7 @@ function getAttributesFromLabels(attributeMappings) {
  * @returns {Object} - An object containing the stats of the GK.
  */
 function extractGoalkeeperAttributes(item) {
-    const labels = item.querySelectorAll('.player-stats-data-component .label');
+    
     const attributeMappings = {
         diving: 'DIV',
         handling: 'HAN',
@@ -99,7 +100,7 @@ function extractGoalkeeperAttributes(item) {
         positioning: 'POS',
     };
 
-    return getAttributesFromLabels(attributeMappings);
+    return getAttributesFromLabels(item, attributeMappings);
 }
 
 
@@ -111,7 +112,7 @@ function extractGoalkeeperAttributes(item) {
  * @returns {Object} - An object containing the stats of the player.
  */
 function extractOutfieldPlayerAttributes(item) {
-    const labels = item.querySelectorAll('.player-stats-data-component .label');
+
     const attributeMappings = {
         pace: 'PAC',
         shooting: 'SHO',
@@ -121,5 +122,5 @@ function extractOutfieldPlayerAttributes(item) {
         physical: 'PHY',
     };
 
-    return getAttributesFromLabels(labels, attributeMappings);
+    return getAttributesFromLabels(item, attributeMappings);
 }

@@ -68,9 +68,11 @@ function handlePackOpened(packName) {
     packItems.forEach(item => {
 
         let itemData = extractKeyPlayerAttributes(item, 'pack');
+        itemData.pack_name = packName
         // If no rating is returned then it is not a player and we dont want to track the data
         if (!itemData.rating) return;
 
+        const position = itemData.position
         // Populate attributes based on player position
         if (position === "GK") {
             itemData = { ...itemData, ...extractGoalkeeperAttributes(item) };
@@ -85,6 +87,8 @@ function handlePackOpened(packName) {
         itemsData.push(itemData);
     });
 
+    console.log("ItemsData: ", itemsData )
+    console.log("JSON.stringify(item):", JSON.stringify(itemsData));
     // Send the array of items to the backend
     sendBatchDataToBackend({ pack_name: packName, items: itemsData }, 'http://localhost:8000/new_items/');
 }

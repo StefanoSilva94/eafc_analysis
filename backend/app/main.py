@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from typing import Union, List
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 import logging
 from .database import get_db, engine
 from . import crud, models, schemas
@@ -82,6 +82,9 @@ def add_items_batch(items_batch: schemas.ItemCreateBatch, db: Session = Depends(
     try:
         db_items = crud.add_items_batch(db=db, items_batch=items_batch)
         return db_items
+    except ValidationError as e:
+        print(f"Validation error: {e.json()}")
+        raise HTTPException(status_code=422, detail=e.errors())
     except Exception as e:
         print(f"Error adding items: {e}")
         raise HTTPException(status_code=500, detail="An error occurred while adding the items.")
