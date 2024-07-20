@@ -1,5 +1,5 @@
 import logging
-
+from fastapi import FastAPI
 from .database import engine
 from . import models
 from fastapi.middleware.cors import CORSMiddleware
