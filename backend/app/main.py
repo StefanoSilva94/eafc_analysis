@@ -1,4 +1,3 @@
-from fastapi import FastAPI
 import logging
 
 from .database import engine
