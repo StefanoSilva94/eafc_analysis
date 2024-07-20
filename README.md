@@ -1,18 +1,89 @@
-# eafc_analysis
+# FC24 Pack Tracker
 
-This is a personal project to track data on EA FC Ultimate Team web app. A chrome extension is used to passively track the items from opened packs. Currently, this is just printed to the console. In future updates it will include uploading the information to a server and storing it on a database. Data Analysis will then be performed on the results.
+## Overview
+
+FC24 Pack Tracker is a Chrome extension and backend system designed to track and record when a pack or player pick is opened on the FC24 web app. The extension scrapes relevant data and stores it in a PostgreSQL database using a FastAPI backend with SQLAlchemy for database management.
+
+## Table of Contents
+
+1. [Features](#features)
+2. [Installation](#installation)
+    - [Chrome Extension](#chrome-extension)
+    - [Backend](#backend)
+3. [Usage](#usage)
+    - [Chrome Extension Usage](#chrome-extension-usage)
+    - [Backend Usage](#backend-usage)
+4. [API Endpoints](#api-endpoints)
 
 
-**Chrome Extension - Fifa Pack Tracker- Set Up**
+## Features
 
-Prerequisites:
-- Access to the the FC24 webapp
-- Access to Google Chrome
-- eafc_analysis project is cloned onto your machine
+- **Chrome Extension**: Monitors and scrapes pack and player pick data when opened on the FC24 web app.
+- **Backend**: A FastAPI application to handle incoming data from the extension and store it in a PostgreSQL database.
+- **Database**: SQLAlchemy integration for ORM and PostgreSQL database to manage and query the stored data.
 
-1) Open chrome and navigate to chrome://extensions/
-2) Toggle developer mode to 'on' (located on the top right of the screen)
-3) Click the 'Load unpacked' button
-4) Navigate to the path where you have saved eafc_analysis and open that directory
-5) Open packs in the FC 24 webapp and open the console using developer tools to see the data being tracked
+## Installation
+
+### Chrome Extension
+
+1. **Clone the repository**:
+    ```bash
+    git clone https://github.com/stefanosilva94/eafc_analysis.git
+    ```
+
+2. **Load the extension**:
+    - Open Chrome and navigate to `chrome://extensions/`.
+    - Enable "Developer mode" by toggling the switch on the top right corner.
+    - Click on "Load unpacked" and select the `extension` directory from this repository.
+
+### Backend
+
+1. **Clone the repository (If not already done)**:
+    ```bash
+    git clone https://github.com/stefanosilva94/eafc_analysis.git
+    ```
+
+2. **Set up a virtual environment**:
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    ```
+
+3. **Install the dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4. **Configure the environment variables**:
+    Create a `.env` file in the `backend` directory and add the following:
+    ```
+    DATABASE_URL=postgresql+psycopg://user:password@localhost/dbname
+    ```
+
+5. **Run the backend server**:
+    ```bash
+    uvicorn main:app --reload
+    ```
+
+## Usage
+
+### Chrome Extension Usage
+
+1. Navigate to the FC24 web app and open a pack or player pick.
+2. The extension will automatically scrape the relevant data and send it to the backend.
+
+### Backend Usage
+
+1. Ensure the backend server is running (`uvicorn main:app --reload`).
+2. The backend will receive data from the Chrome extension and store it in the PostgreSQL database.
+
+## API Endpoints
+
+- **GET /packs**: Retrieve all pack data.
+- **GET /packs/{id}**: Retrieve a specific pack by ID.
+- **POST /packs**: Add new pack data.
+- **GET /packed_items**: Retrieve all packed item data.
+- **GET /packed_items/{id}**: Retrieve a specific packed item by ID.
+- **POST /packed_items**: Add new packed item data.
+
 
