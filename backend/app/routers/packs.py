@@ -6,16 +6,13 @@ from typing import Union, List
 
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/packs",
+    tags=['Packs']
+)
 
 
-@router.post("/new_item/", response_model=schemas.ItemRead)
-def add_items(item: schemas.ItemCreate, db=Depends(get_db)):
-    db_item = crud.add_items(db, item)
-    return db_item
-
-
-@router.post("/new_items/", response_model=List[schemas.ItemRead])
+@router.post("/", response_model=List[schemas.ItemRead])
 def add_items_batch(items_batch: schemas.ItemCreateBatch, db: Session = Depends(get_db)):
     try:
         db_items = crud.add_items_batch(db=db, items_batch=items_batch)

@@ -5,10 +5,13 @@ from ..database import get_db, engine
 from typing import Union, List
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/picks",
+    tags=['Picks']
+)
 
         
-@router.post("/new_picks/", response_model=List[schemas.PlayerPickRead])
+@router.post("/", response_model=List[schemas.PlayerPickRead])
 def add_items_batch(items_batch: schemas.PlayerPickCreateBatch, db: Session = Depends(get_db)):
     try:
         db_items = crud.add_items_batch(db=db, items_batch=items_batch, type='pick')
