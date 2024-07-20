@@ -90,5 +90,5 @@ function handlePackOpened(packName) {
     console.log("ItemsData: ", itemsData )
     console.log("JSON.stringify(item):", JSON.stringify(itemsData));
     // Send the array of items to the backend
-    sendBatchDataToBackend({ pack_name: packName, items: itemsData }, 'http://localhost:8000/packs');
+    sendBatchDataToBackend({ pack_name: packName, items: itemsData }, 'http://localhost:8000/packs/');
 }
