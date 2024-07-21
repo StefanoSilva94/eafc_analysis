@@ -17,7 +17,13 @@
     "content_scripts": [
         {
             "matches": ["https://www.ea.com/*"],
-            "js": ["apis.js", "extractDOMData.js", "packs.js", "picks.js", "packTracker.js"],
+            "js": [
+            "content/apis.js", 
+            "content/extractDOMData.js", 
+            "content/packs.js", 
+            "content/picks.js", 
+            "content/packTracker.js"
+        ],
             "run_at": "document_end",
             "type": "module"
         }
