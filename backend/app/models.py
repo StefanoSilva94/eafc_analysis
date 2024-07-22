@@ -7,6 +7,7 @@ from pydantic import EmailStr
 class Item(Base):
     __tablename__ = "packed_items"
     id = Column(Integer, primary_key=True, index=True, nullable=False, autoincrement=True)
+    user_id = Column(Integer, nullable=False, default=0)
     pack_id = Column(Integer, ForeignKey('packs.id'), nullable=False)  # Foreign key to packs table
     pack_name = Column(String)  
     name = Column(String, index=True)
@@ -45,6 +46,7 @@ class Pack(Base):
 class PlayerPick(Base):
     __tablename__ = "player_picks"
     id = Column(Integer, primary_key=True, index=True, nullable=False, autoincrement=True)
+    user_id = Column(Integer, nullable=False, default=0)
     pack_id = Column(Integer, ForeignKey('packs.id'), nullable=False)  # Foreign key to packs table
     pack_name = Column(String)  
     name = Column(String, index=True)

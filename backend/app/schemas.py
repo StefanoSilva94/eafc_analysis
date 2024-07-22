@@ -5,6 +5,7 @@ from typing import Optional, List
 
 class ItemBase(BaseModel):
     name: str
+    user_id: int
     pack_name: str
     rating: str
     position: str
