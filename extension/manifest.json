@@ -6,13 +6,16 @@
     "permissions": [
         "storage",
         "activeTab",
-        "scripting"
+        "scripting",
+        "management",
+        "activeTab",
+        "tabs"
     ],
     "background": {
         "service_worker": "background.js"
     },
     "action": {
-        "default_popup": "popup.html"
+        "default_popup": "login/popup.html"
     },
     "content_scripts": [
         {
@@ -27,5 +30,11 @@
             "run_at": "document_end",
             "type": "module"
         }
-    ]
+    ],
+    "web_accessible_resources": [
+    {
+      "resources": ["login.html", "logout.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

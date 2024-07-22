@@ -139,7 +139,7 @@ function addEventListenersToPickItems(itemsData, pickItems, packName) {
 
             if (packName) {
                 apiRequestSent = true; // Set flag to prevent further API requests
-                sendBatchDataToBackend({ pack_name: packName, items: itemsData }, 'http://localhost:8000/picks/');
+                sendBatchDataToBackend({ pack_name: packName, items: itemsData }, '/picks/');
 
                 playerPickObserver.disconnect(); // Disconnect the observer once the success element is found
             } else {

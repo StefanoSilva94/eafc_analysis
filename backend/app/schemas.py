@@ -92,3 +92,8 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id: Optional[str]
+
+
+class TokenStatus(BaseModel):
+    is_valid: bool
+    error: str = None
