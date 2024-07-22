@@ -49,3 +49,20 @@ def get_current_user(token: str = Depends(oauth2scheme)):
                                           headers={"WWW-Autheticate": "Bearer"})
     
     return verify_access_token(token, credentials_exception)
+
+
+def verify_login_status(token: str, credentials_exception):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        exp = payload.get("exp")
+
+        if exp is None:
+            raise credentials_exception
+        else:
+            current_time = datetime.now(tz=timezone.utc)
+            exp_time = datetime.fromtimestamp(exp, tz=timezone.utc)
+    
+    except InvalidTokenError:
+        raise credentials_exception
+    
+    return current_time < exp_time

@@ -6,20 +6,35 @@
     "permissions": [
         "storage",
         "activeTab",
-        "scripting"
+        "scripting",
+        "management",
+        "activeTab",
+        "tabs"
     ],
     "background": {
         "service_worker": "background.js"
     },
     "action": {
-        "default_popup": "popup.html"
+        "default_popup": "login/popup.html"
     },
     "content_scripts": [
         {
             "matches": ["https://www.ea.com/*"],
-            "js": ["apis.js", "extractDOMData.js", "packs.js", "picks.js", "packTracker.js"],
+            "js": [
+            "content/apis.js", 
+            "content/extractDOMData.js", 
+            "content/packs.js", 
+            "content/picks.js", 
+            "content/packTracker.js"
+        ],
             "run_at": "document_end",
             "type": "module"
         }
-    ]
+    ],
+    "web_accessible_resources": [
+    {
+      "resources": ["login.html", "logout.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

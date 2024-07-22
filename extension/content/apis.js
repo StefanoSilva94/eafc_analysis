@@ -1,10 +1,13 @@
 /**
  * This function is used to send batch data to an API end point using POST method
  * @param {Object} batchData - The batch data to send to the backend.
- * @param {string} url - The URL of the backend API endpoint.
+ * @param {string} endpoint - The URL of the backend API endpoint.
  */
 
-function sendBatchDataToBackend(batchData, url) {
+function sendBatchDataToBackend(batchData, endpoint) {
+
+    const apiUrl = localStorage.getItem('apiUrl');
+    const url = apiUrl + endpoint;
     fetch(url, {
         method: 'POST',
         headers: {
