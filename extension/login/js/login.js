@@ -1,91 +1,123 @@
 document.addEventListener('DOMContentLoaded', function () {
-    console.log("testing console log");
+  console.log("starting login test");
 
-    // Retrieve the API URL from chrome.storage.local
-    chrome.storage.local.get(['apiURL'], function (result) {
-        if (chrome.runtime.lastError) {
-            console.error('Error retrieving API URL:', chrome.runtime.lastError);
-        } else {
-            const apiUrl = result.apiURL;
-            console.log('Retrieved API URL:', apiUrl);
-            // Store the API URL in chrome.storage.local
-            chrome.storage.local.set({ 'apiUrl': apiUrl }, function () {
-                if (chrome.runtime.lastError) {
-                    console.error('Error setting API URL:', chrome.runtime.lastError);
-                }
-            });
-        }
-    });
+  // Add event listener for when user clicks submit
+  const loginForm = document.querySelector('form');
+  const messageDiv = document.createElement('div');
+  const additionalMessageDiv = document.createElement('div');
+  loginForm.parentElement.appendChild(messageDiv);
+  loginForm.parentElement.appendChild(additionalMessageDiv);
 
-    console.log("starting login test");
-    // Add event listener for when user clicks submit
-    const loginForm = document.querySelector('form');
-    const messageDiv = document.createElement('div');
-    loginForm.parentElement.appendChild(messageDiv);
+  loginForm.addEventListener('submit', async function (event) {
+      event.preventDefault();
 
-    loginForm.addEventListener('submit', async function (event) {
-        event.preventDefault();
+      chrome.storage.local.get(['apiURL'], async function (result) {
+          if (chrome.runtime.lastError) {
+              console.error('Error retrieving API URL:', chrome.runtime.lastError);
+              messageDiv.innerText = 'Error retrieving API URL';
+              messageDiv.style.backgroundColor = 'lightcoral'; // Red background for errors
+              messageDiv.style.color = 'white'; // White text color
+              messageDiv.style.padding = '10px';
+              messageDiv.style.borderRadius = '5px';
+              messageDiv.style.textAlign = 'center';
+              additionalMessageDiv.innerText = '';
+              return;
+          }
 
-        // Retrieve API URL from chrome.storage.local
-        chrome.storage.local.get(['apiUrl'], async function (result) {
-            const apiUrl = result.apiUrl;
-            if (!apiUrl) {
-                console.error('API URL not found in chrome.storage.local');
-                return;
-            }
+          const apiUrl = result.apiURL;
 
-            const email = loginForm.querySelector('input[type="email"]').value;
-            const password = loginForm.querySelector('input[type="password"]').value;
-            const loginUrl = `${apiUrl}/login`;
+          if (!apiUrl) {
+              console.error('API URL not found in chrome.storage.local');
+              messageDiv.innerText = 'API URL not found';
+              messageDiv.style.backgroundColor = 'lightcoral'; // Red background for errors
+              messageDiv.style.color = 'white'; // White text color
+              messageDiv.style.padding = '10px';
+              messageDiv.style.borderRadius = '5px';
+              messageDiv.style.textAlign = 'center';
+              additionalMessageDiv.innerText = '';
+              return;
+          }
 
-            try {
-                const response = await fetch(loginUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({
-                        username: email,
-                        password: password
-                    })
-                });
+          console.log('Retrieved API URL:', apiUrl);
+          const email = loginForm.querySelector('input[type="email"]').value;
+          const password = loginForm.querySelector('input[type="password"]').value;
+          const loginUrl = `${apiUrl}/login`;
 
-                console.log('Response Status:', response.status);
-                console.log('Response OK:', response.ok);
+          console.log('here is the login api: ', loginUrl);
 
-                const responseText = await response.text();
-                console.log('Response Text:', responseText);
+          try {
+              const response = await fetch(loginUrl, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/x-www-form-urlencoded'
+                  },
+                  body: new URLSearchParams({
+                      username: email,
+                      password: password
+                  })
+              });
 
-                if (!response.ok) {
-                    throw new Error('Invalid credentials');
-                }
+              const data = await response.json();
 
-                // Parse the response JSON
-                const data = JSON.parse(responseText);
-                const accessToken = data.access_token;
-                console.log('Access Token:', accessToken);
+              if (!response.ok) {
+                  throw new Error('Invalid credentials');
+              }
 
-                // Store JWT in chrome.storage.local
-                chrome.storage.local.set({ 'access_token': accessToken }, function () {
-                    if (chrome.runtime.lastError) {
-                        console.error('Error setting access token:', chrome.runtime.lastError);
-                    } else {
-                        messageDiv.classList.remove('d-none', 'alert-danger');
-                        messageDiv.classList.add('alert', 'alert-success');
-                        messageDiv.innerText = 'Login successful!';
+              console.log('Access Token is this:', data.access_token);
+              console.log('User ID:', data.user_id);
 
-                        setTimeout(() => {
-                            window.close();
-                        }, 2000);
-                    }
-                });
+              // Store data in chrome.storage.local
+              await chrome.storage.local.set({
+                  'access_token': data.access_token,
+                  'user_id': data.user_id
+              });
 
-            } catch (error) {
-                console.error('Error during login:', error);
-                messageDiv.classList.remove('d-none', 'alert-success');
-                messageDiv.classList.add('alert', 'alert-danger');
-                messageDiv.innerText = error.message;
-            }
-        });
-    });
+              // Update messageDiv to show success
+              messageDiv.innerText = 'Login Successful';
+              messageDiv.style.backgroundColor = 'lightgreen'; // Green background for success
+              messageDiv.style.color = 'black'; // Black text color
+              messageDiv.style.padding = '10px';
+              messageDiv.style.borderRadius = '5px';
+              messageDiv.style.textAlign = 'center';
+
+              // Clear additional message
+              additionalMessageDiv.innerText = '';
+
+              // Close the popup after 2 seconds
+              setTimeout(() => {
+                  window.close();
+              }, 2000);
+
+          } catch (error) {
+              console.error('Error during login:', error);
+              messageDiv.innerText = 'Login Failed';
+              messageDiv.style.backgroundColor = 'lightcoral'; // Red background for errors
+              messageDiv.style.color = 'white'; // White text color
+              messageDiv.style.padding = '10px';
+              messageDiv.style.borderRadius = '5px';
+              messageDiv.style.textAlign = 'center';
+
+              // Display additional message for invalid credentials
+              if (error.message === 'Invalid credentials') {
+                  additionalMessageDiv.innerText = 'Please check your email and password and try again.';
+                  additionalMessageDiv.style.color = 'darkred'; // Dark red text color for additional messages
+                  additionalMessageDiv.style.padding = '5px';
+                  additionalMessageDiv.style.textAlign = 'center';
+              } else {
+                  additionalMessageDiv.innerText = '';
+              }
+
+              // Hide the login failed message and remove background color after 3 seconds
+              setTimeout(() => {
+                  messageDiv.innerText = '';
+                  additionalMessageDiv.innerText = '';
+                  messageDiv.style.backgroundColor = ''; // Reset background color
+                  messageDiv.style.color = ''; // Reset text color
+                  messageDiv.style.padding = ''; // Reset padding
+                  messageDiv.style.borderRadius = ''; // Reset border radius
+                  messageDiv.style.textAlign = ''; // Reset text alignment
+              }, 2500);
+          }
+      });
+  });
 });
