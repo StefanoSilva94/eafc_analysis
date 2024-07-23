@@ -172,7 +172,7 @@ function addEventListenersToPickItems(itemsData, pickItems, packName) {
     setTimeout(() => {
         playerPickObserver.disconnect();
         console.log("Observer timed out after 10 seconds");
-    }, 600000);
+    }, 10000);
 
     console.log("We have finished addEventListenersToPickItems function");
     return itemsData;
