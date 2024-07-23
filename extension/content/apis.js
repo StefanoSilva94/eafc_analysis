@@ -23,3 +23,18 @@ function sendBatchDataToBackend(batchData, endpoint) {
         console.error('Error sending batch data to the backend:', error);
     });
 }
+
+
+function retrieveUserId() {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.get(['user_id'], function(result) {
+            if (chrome.runtime.lastError) {
+                console.error('Error retrieving user ID:', chrome.runtime.lastError);
+                resolve(0); // Resolve with default value in case of error
+            } else {
+                // Resolve with the user_id or default value
+                resolve(result.user_id || 0);
+            }
+        });
+    });
+}

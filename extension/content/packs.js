@@ -49,6 +49,10 @@ function addEventListenersToPacks() {
 function handlePackOpened(packName) {
     console.log(`${packName} has been opened`);
 
+    // Extract user id from local storage, if user is not logged in user default user
+    let userID = JSON.parse(localStorage.getItem('userId')) || 0;
+
+
     // Save the opened pack name in localStorage
     let openedPacks = JSON.parse(localStorage.getItem('openedPacks')) || [];
     if (!openedPacks.includes(packName)) {
@@ -69,6 +73,7 @@ function handlePackOpened(packName) {
 
         let itemData = extractKeyPlayerAttributes(item, 'pack');
         itemData.pack_name = packName
+        itemData.user_id = userID
         // If no rating is returned then it is not a player and we dont want to track the data
         if (!itemData.rating) return;
 

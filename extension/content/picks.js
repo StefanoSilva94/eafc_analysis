@@ -45,10 +45,14 @@ function handlePickOpened(pickName) {
     // Array to hold all item data
     let itemsData = [];
 
+    // Extract user id from local storage, if user is not logged in user default user
+    let userID = JSON.parse(localStorage.getItem('userId')) || 0;
+
     pickItems.forEach(item => {
         // Get the players name, rating, position, isTradeable, isDuplicate
         let itemData = extractKeyPlayerAttributes(item, 'pick');
         itemData.pack_name = pickName
+        itemData.user_id = userID
         const position = itemData.position
         // Populate attributes based on player position
         if (position === "GK") {
@@ -139,9 +143,10 @@ function addEventListenersToPickItems(itemsData, pickItems, packName) {
 
             if (packName) {
                 apiRequestSent = true; // Set flag to prevent further API requests
+                playerPickObserver.disconnect();
                 sendBatchDataToBackend({ pack_name: packName, items: itemsData }, '/picks/');
 
-                playerPickObserver.disconnect(); // Disconnect the observer once the success element is found
+                // playerPickObserver.disconnect(); // Disconnect the observer once the success element is found
             } else {
                 console.error('packName is not defined.');
             }
@@ -167,7 +172,7 @@ function addEventListenersToPickItems(itemsData, pickItems, packName) {
     setTimeout(() => {
         playerPickObserver.disconnect();
         console.log("Observer timed out after 10 seconds");
-    }, 10000);
+    }, 600000);
 
     console.log("We have finished addEventListenersToPickItems function");
     return itemsData;

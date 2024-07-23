@@ -4,14 +4,21 @@
  */
 
 // Retrieve the API URL from chrome.storage.local
-chrome.storage.local.get(['apiURL'], function(result) {
+chrome.storage.local.get(['apiURL', 'user_id'], function(result) {
     if (chrome.runtime.lastError) {
-        console.error('Error retrieving API URL:', chrome.runtime.lastError);
+        console.error('Error retrieving items from chrome.storage.local:', chrome.runtime.lastError);
     } else {
         const apiUrl = result.apiURL;
+        const userId = result.user_id || 0; // Default to 0 if user_id is not found
+
         console.log('Retrieved API URL:', apiUrl);
-        // Use the API URL as needed
-        localStorage.setItem('apiUrl', apiUrl)
+        console.log('Retrieved User ID:', userId);
+
+        // Store the values in localStorage
+        localStorage.setItem('apiUrl', apiUrl);
+        localStorage.setItem('userId', userId);
+
+        // Use the API URL and user ID as needed
     }
 });
 
