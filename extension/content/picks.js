@@ -143,10 +143,12 @@ function addEventListenersToPickItems(itemsData, pickItems, packName) {
 
             if (packName) {
                 apiRequestSent = true; // Set flag to prevent further API requests
-                playerPickObserver.disconnect();
+               
+
                 sendBatchDataToBackend({ pack_name: packName, items: itemsData }, '/picks/');
 
-                // playerPickObserver.disconnect(); // Disconnect the observer once the success element is found
+                playerPickObserver.disconnect(); // Disconnect the observer once the success element is found
+                console.log("observer cancelled")
             } else {
                 console.error('packName is not defined.');
             }

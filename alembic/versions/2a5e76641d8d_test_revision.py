@@ -1,4 +1,4 @@
-"""Testing revision
+"""Test Revision
 
 Revision ID: 2a5e76641d8d
 Revises: 
@@ -18,9 +18,10 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
-def upgrade() -> None:
-    op.add_column('packed_items', sa.Column('external_id', sa.String(), nullable=True))
+def upgrade():
+    pass
 
 
-def downgrade() -> None:
-    op.drop_column('packed_items', 'external_id')
+def downgrade():
+    pass
+    

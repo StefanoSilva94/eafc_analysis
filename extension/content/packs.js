@@ -86,14 +86,12 @@ function handlePackOpened(packName) {
         }
 
         console.log("Item object:", itemData);
-        console.log("JSON.stringify(item):", JSON.stringify(itemData));
 
         // Add item to itemsData array
         itemsData.push(itemData);
     });
 
     console.log("ItemsData: ", itemsData )
-    console.log("JSON.stringify(item):", JSON.stringify(itemsData));
     // Send the array of items to the backend
     sendBatchDataToBackend({ pack_name: packName, items: itemsData }, '/packs/');
 }
