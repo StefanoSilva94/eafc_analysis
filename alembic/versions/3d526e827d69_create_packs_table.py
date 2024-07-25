@@ -28,7 +28,7 @@ def upgrade():
     )
 
 def downgrade():
-    # op.drop_table('packs')
-    pass
+    op.drop_table('packs')
+    
     
 

@@ -30,5 +30,5 @@ def upgrade():
     )
 
 def downgrade():
-    # op.drop_table('users')
-    pass
+    op.drop_table('users')
+    
