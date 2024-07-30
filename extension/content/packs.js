@@ -38,6 +38,63 @@ function addEventListenersToPacks() {
   }
 
 
+
+/**
+ * Waits for the presence of the items header element with a timeout.
+ * @returns {Promise<void>}
+ */
+function waitForItemsHeader() {
+    return new Promise((resolve, reject) => {
+        const timeout = 20000; 
+        let timer;
+
+        // Function to clean up after timeout or successful observation
+        function cleanup() {
+            if (timer) clearTimeout(timer);
+            observer.disconnect();
+        }
+
+        // Create a MutationObserver to watch for changes in the DOM
+        const observer = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                if (mutation.addedNodes.length > 0) {
+                    for (const node of mutation.addedNodes) {
+                        if (node.nodeType === Node.ELEMENT_NODE && node.matches('h2.title') && node.textContent.trim() === 'Items') {
+                            cleanup();
+                            resolve();
+                            return;
+                        }
+                    }
+                }
+            }
+        });
+
+        // Observe changes in the DOM
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // Set a timeout to reject the promise if the header is not found within 10 seconds
+        timer = setTimeout(() => {
+            cleanup();
+            reject(new Error('Timeout: items header not found within 10 seconds'));
+        }, timeout);
+
+        // Optionally, check periodically if the header is already present
+        const intervalId = setInterval(() => {
+            const headerElement = document.querySelector('h2.title');
+            if (headerElement && headerElement.textContent.trim() === 'Items') {
+                clearInterval(intervalId);
+                cleanup();
+                resolve();
+            }
+        }, 100); // Check every 100ms or adjust as necessary
+    });
+}
+
+
+  
 /**
  * This is triggered after a pack has been opened. It will iterate through each item in the pack and extract
  * the data for each item. The variable names are returned according to the column definitions that they represent
@@ -46,39 +103,31 @@ function addEventListenersToPacks() {
  * The data is then sent to the backend via sendBatchDataToBackend
  * @param {String} packName : pack name that has been opened
  */
-function handlePackOpened(packName) {
+async function handlePackOpened(packName) {
     console.log(`${packName} has been opened`);
 
-    // Extract user id from local storage, if user is not logged in user default user
     let userID = JSON.parse(localStorage.getItem('userId')) || 0;
 
-
-    // Save the opened pack name in localStorage
     let openedPacks = JSON.parse(localStorage.getItem('openedPacks')) || [];
     if (!openedPacks.includes(packName)) {
         openedPacks.push(packName);
         localStorage.setItem('openedPacks', JSON.stringify(openedPacks));
     }
 
-    // Wait for the pack animation to finish
-    // waitForPackAnimation();
+    // Wait for the items header to be present
+    await waitForItemsHeader();
 
     const packItems = document.querySelectorAll('.entityContainer');
     console.log(`Pack Items Length: ${packItems.length}`);
 
-    // Array to hold all item data
     let itemsData = [];
-
     packItems.forEach(item => {
-
         let itemData = extractKeyPlayerAttributes(item, 'pack');
-        itemData.pack_name = packName
-        itemData.user_id = userID
-        // If no rating is returned then it is not a player and we dont want to track the data
+        itemData.pack_name = packName;
+        itemData.user_id = userID;
         if (!itemData.rating) return;
 
-        const position = itemData.position
-        // Populate attributes based on player position
+        const position = itemData.position;
         if (position === "GK") {
             itemData = { ...itemData, ...extractGoalkeeperAttributes(item) };
         } else {
@@ -86,12 +135,9 @@ function handlePackOpened(packName) {
         }
 
         console.log("Item object:", itemData);
-
-        // Add item to itemsData array
         itemsData.push(itemData);
     });
 
-    console.log("ItemsData: ", itemsData )
-    // Send the array of items to the backend
+    console.log("ItemsData: ", itemsData);
     sendBatchDataToBackend({ pack_name: packName, items: itemsData }, '/packs/');
 }
