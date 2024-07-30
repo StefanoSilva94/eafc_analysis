@@ -1,3 +1,4 @@
+
 /**
  * addEventListenersToPicks will be triggered when ever a change in the DOM is detected
  * It will look for the presence of the Redeem Player Pick button
@@ -100,6 +101,7 @@ function handlePickOpened(pickName) {
 
 }
 
+
 /**
  * This function is called after a user opens a player pick and is shown a selction of players to choose from
  * The is_selected field is added to itemsData to indicate the current player pick choice
@@ -110,20 +112,18 @@ function handlePickOpened(pickName) {
  * @param {String} packName 
  * @returns 
  */
-function addEventListenersToPickItems(itemsData, pickItems, packName) {
-    // The first pick is automatically selected when opened
+async function addEventListenersToPickItems(itemsData, pickItems, packName) {
+    let apiRequestSent = false;
+    let timeoutId;
+
     itemsData.forEach((item, idx) => {
         item.is_selected = (idx === 0); 
     });
 
-    // Add event listeners to the items of the player pick to see which one is selected
     pickItems.forEach((pick, index) => {
         if (!pick.dataset.listenerAdded) {
             pick.dataset.listenerAdded = 'true';
-
-            // Add event listener to the pick item
             pick.addEventListener('click', () => {
-                // Update isSelected values
                 itemsData.forEach((item, idx) => {
                     item.is_selected = (index === idx);
                 });
@@ -131,32 +131,37 @@ function addEventListenersToPickItems(itemsData, pickItems, packName) {
         }
     });
 
-    // Flag to ensure that API request is sent only once
-    let apiRequestSent = false;
-
-    // Function to handle the success detection
-    const detectSuccess = () => {
-        if (apiRequestSent) return; // Exit if the API request has already been sent
+    const detectSuccess = async () => {
+        if (apiRequestSent) return;
 
         const rewardsCarousel = document.querySelector('.rewards-carousel');
         if (rewardsCarousel) {
-
             if (packName) {
-                apiRequestSent = true; // Set flag to prevent further API requests
-               
+                apiRequestSent = true;
+                console.log("Success detected, sending data...");
+                
+                playerPickObserver.disconnect();
+                console.log("Player pick observer disconnected");
+                
+                try {
+                    await sendBatchDataToBackend({ pack_name: packName, items: itemsData }, '/picks/');
+                    console.log("Data sent successfully.");
+                } catch (error) {
+                    console.error("Error sending data:", error);
+                }
 
-                sendBatchDataToBackend({ pack_name: packName, items: itemsData }, '/picks/');
+                // Clear the timeout since the API request was sent
+                clearTimeout(timeoutId);
 
-                playerPickObserver.disconnect(); // Disconnect the observer once the success element is found
-                console.log("observer cancelled")
+                // Return early to prevent further execution
+                return;
             } else {
                 console.error('packName is not defined.');
             }
         }
     };
 
-    // Create a MutationObserver instance
-    const playerPickObserver = new MutationObserver((mutationsList, observer) => {
+    const playerPickObserver = new MutationObserver((mutationsList) => {
         for (const mutation of mutationsList) {
             if (mutation.type === 'childList' || mutation.type === 'subtree') {
                 detectSuccess();
@@ -164,18 +169,18 @@ function addEventListenersToPickItems(itemsData, pickItems, packName) {
         }
     });
 
-    // Start observing the document body for changes
     playerPickObserver.observe(document.body, {
         childList: true,
         subtree: true
     });
 
-    // Set a timeout to stop observing after 10 seconds if the element is not found
-    setTimeout(() => {
-        playerPickObserver.disconnect();
-        console.log("Observer timed out after 10 seconds");
-    }, 10000);
+    // Set timeout for 5 minutes (300000 milliseconds)
+    timeoutId = setTimeout(() => {
+        if (!apiRequestSent) {
+            playerPickObserver.disconnect();
+            console.log("Player pick observer timed out after 5 minutes with no pick");
+        }
+    }, 300000);
 
-    console.log("We have finished addEventListenersToPickItems function");
-    return itemsData;
+    console.log("addEventListenersToPickItems function completed");
 }
