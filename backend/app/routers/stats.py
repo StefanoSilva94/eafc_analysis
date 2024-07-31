@@ -14,10 +14,13 @@ router = APIRouter(
 )
 
 
-@router.get("/stats/pack-items")
-def get_pack_items(time_period: str, db: Session = Depends(get_db)):
+@router.get("/pack-items")
+def get_pack_items_over_time_period(time_period: str, db: Session = Depends(get_db)):
+
     now = datetime.now(timezone.utc)
-    if time_period == "7d":
+    if time_period == "1d":
+        start_date = now - timedelta(days=1)
+    elif time_period == "7d":
         start_date = now - timedelta(days=7)
     elif time_period == "30d":
         start_date = now - timedelta(days=30)
@@ -26,12 +29,14 @@ def get_pack_items(time_period: str, db: Session = Depends(get_db)):
     else:
         raise HTTPException(status_code=400, detail="Invalid time period")
 
-    total_packs = db.query(func.count(models.PackItem.id)).filter(models.PackItem.date >= created_at).scalar()
+    total_packs = db.query(
+        func.count(func.distinct(models.PlayerPick.pack_id))).filter(models.Pack.created_at >= start_date).scalar()
+
     return {"total_packs": total_packs}
 
 
 @router.get("/player-picks")
-def get_player_picks(time_period: str, db: Session = Depends(get_db)):
+def get_player_picks_over_time_period(time_period: str, db: Session = Depends(get_db)):
     now = datetime.now(timezone.utc)
     if time_period == "1d":
         start_date = now - timedelta(days=1)
