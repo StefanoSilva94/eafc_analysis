@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from .database import engine
 from . import models
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import packs, users, picks, auth
+from .routers import packs, users, picks, auth, stats
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -26,6 +26,8 @@ app.include_router(packs.router)
 app.include_router(picks.router)
 app.include_router(users.router)
 app.include_router(auth.router)
+app.include_router(stats.router)
+
 
 print('hello world')
 
