@@ -3,6 +3,8 @@ from sqlalchemy import create_engine, Boolean, Column, ForeignKey, Integer, Stri
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import relationship
 from pydantic import EmailStr
+import datetime
+
 
 class Item(Base):
     __tablename__ = "packed_items"
@@ -80,3 +82,10 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=False), server_default=text('now()'))
+
+    # Django-specific fields you are adding:
+    is_staff = Column(Boolean, default=False)
+    is_superuser = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    last_login = Column(TIMESTAMP(timezone=True), nullable=True)
+    date_joined = Column(TIMESTAMP(timezone=True), server_default=text('now()'))

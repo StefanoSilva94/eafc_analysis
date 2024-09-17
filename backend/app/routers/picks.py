@@ -1,4 +1,5 @@
-from .. import crud, models, schemas, utils
+from ..utils import auth_utils
+from .. import crud, models, schemas
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
 from ..database import get_db, engine
