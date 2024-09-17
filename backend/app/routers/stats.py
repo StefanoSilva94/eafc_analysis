@@ -1,11 +1,10 @@
-from .. import models, schemas, utils
-from sqlalchemy.orm import Session
+from .. import models
+from ..utils.stats_utils import get_start_date
 from fastapi import Depends, HTTPException, status, APIRouter
 from ..database import get_db
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import func
-
-
+from sqlalchemy.orm import Session
 
 
 router = APIRouter(
@@ -14,41 +13,106 @@ router = APIRouter(
 )
 
 
-@router.get("/pack-items")
-def get_pack_items_over_time_period(time_period: str, db: Session = Depends(get_db)):
+@router.get("/pack-items/count")
+def get_pack_items_over_time_period(time_period: str, user_id=None, db: Session = Depends(get_db)):
 
-    now = datetime.now(timezone.utc)
-    if time_period == "1d":
-        start_date = now - timedelta(days=1)
-    elif time_period == "7d":
-        start_date = now - timedelta(days=7)
-    elif time_period == "30d":
-        start_date = now - timedelta(days=30)
-    elif time_period == "1y":
-        start_date = now - timedelta(days=365)
-    else:
-        raise HTTPException(status_code=400, detail="Invalid time period")
+    # get start date of time period
+    start_date = get_start_date(time_period)
 
-    total_packs = db.query(
-        func.count(func.distinct(models.PlayerPick.pack_id))).filter(models.Pack.created_at >= start_date).scalar()
+    query = db.query(
+        func.count(func.distinct(models.Item.pack_id))).filter(models.Item.created_at >= start_date)
+    
+    if user_id:
+        user_id = int(user_id)
+        query = query.filter(models.Item.user_id == user_id)
+
+    total_packs = query.scalar()
 
     return {"total_packs": total_packs}
 
 
-@router.get("/player-picks")
-def get_player_picks_over_time_period(time_period: str, db: Session = Depends(get_db)):
-    now = datetime.now(timezone.utc)
-    if time_period == "1d":
-        start_date = now - timedelta(days=1)
-    elif time_period == "7d":
-        start_date = now - timedelta(days=7)
-    elif time_period == "30d":
-        start_date = now - timedelta(days=30)
-    elif time_period == "1y":
-        start_date = now - timedelta(days=365)
-    else:
-        raise HTTPException(status_code=400, detail="Invalid time period")
+@router.get("/player-picks/count")
+def get_player_picks_over_time_period(time_period: str, user_id=None, db: Session = Depends(get_db)):
 
-    total_picks = db.query(
+    # get start date of time period
+    start_date = get_start_date(time_period)
+
+    query = db.query(
         func.count(func.distinct(models.PlayerPick.pack_id))).filter(models.PlayerPick.created_at >= start_date).scalar()
+    
+    if user_id:
+        user_id = int(user_id)
+        query = query.filter(models.PlayerPick.user_id == user_id)
+
+    total_picks = query.scalar()
     return {"total_picks": total_picks}
+
+
+@router.get("/player-picks/type-count")
+def get_count_of_player_pick_type_over_time_period(time_period: str, user_id=None, db: Session = Depends(get_db)):
+    """
+    This will return a data dictionary of the top ten most opended packs. 
+    Key: Pack_name
+    Value: Number of packs opened
+    """
+    
+    # get start date of time period
+    start_date = get_start_date(time_period)
+
+    print(f"this is user_id: {user_id}")
+    query = db.query(
+        models.PlayerPick.pack_name,
+        func.count(func.distinct(models.PlayerPick.pack_id)).label('count')
+    ).filter(
+        models.PlayerPick.created_at >= start_date
+    ).group_by(
+        models.PlayerPick.pack_name
+    ).order_by(
+        func.count(func.distinct(models.PlayerPick.pack_id)).desc()
+    )
+
+    if user_id:
+        user_id = int(user_id)
+        query = query.filter(models.PlayerPick.user_id == user_id)
+    
+    results = query.limit(10).all()
+
+
+    top_picks = {pack_name: count for pack_name, count in results}
+
+    return top_picks
+
+
+@router.get("/player-picks/type-count")
+def get_count_of_player_pick_type_over_time_period(time_period: str, user_id=None, db: Session = Depends(get_db)):
+    """
+    This will return a data dictionary of the top ten most opended packs. 
+    Key: Pack_name
+    Value: Number of packs opened
+    """
+    
+    # get start date of time period
+    start_date = get_start_date(time_period)
+
+    print(f"this is user_id: {user_id}")
+    query = db.query(
+        models.Item.pack_name,
+        func.count(func.distinct(models.Item.pack_id)).label('count')
+    ).filter(
+        models.Item.created_at >= start_date
+    ).group_by(
+        models.Item.pack_name
+    ).order_by(
+        func.count(func.distinct(models.Item.pack_id)).desc()
+    )
+
+    if user_id:
+        user_id = int(user_id)
+        query = query.filter(models.Item.user_id == user_id)
+    
+    results = query.limit(10).all()
+
+
+    top_picks = {pack_name: count for pack_name, count in results}
+
+    return top_picks
