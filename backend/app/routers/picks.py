@@ -1,9 +1,9 @@
-from ..utils import auth_utils
 from .. import crud, models, schemas
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
 from ..database import get_db, engine
 from typing import Union, List
+from .. utils.futbin_utils import update_player_data_with_price
 
 
 router = APIRouter(
@@ -15,7 +15,8 @@ router = APIRouter(
 @router.post("/", response_model=List[schemas.PlayerPickRead])
 def add_items_batch(items_batch: schemas.PlayerPickCreateBatch, db: Session = Depends(get_db)):
     try:
-        db_items = crud.add_items_batch(db=db, items_batch=items_batch, type='pick')
+        updated_items_batch = update_player_data_with_price(items_batch)
+        db_items = crud.add_items_batch(db=db, items_batch=updated_items_batch, type='pick')
         return db_items
     except Exception as e:
         print(f"Error adding items: {e}")

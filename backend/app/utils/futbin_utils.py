@@ -1,9 +1,10 @@
 from curl_cffi.requests import RequestsError
 from curl_cffi import requests
 from .. import schemas
+from typing import Union
 
 
-def update_player_data_with_price(items_batch: schemas.ItemCreateBatch):
+def update_player_data_with_price(items_batch: Union[schemas.ItemCreateBatch, schemas.PlayerPickCreateBatch]):
     """
     This recieve player_dict where each element is the player data scraped from ea fc web app.
     It will iterate through each player in the dict
