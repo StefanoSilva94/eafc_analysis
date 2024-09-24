@@ -1,8 +1,8 @@
-from .. import crud, models, schemas
+from .. import crud, schemas
 from sqlalchemy.orm import Session
-from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
-from ..database import get_db, engine
-from typing import Union, List
+from fastapi import Depends, HTTPException, APIRouter
+from ..database import get_db
+from typing import List
 from .. utils.futbin_utils import update_player_data_with_price
 
 

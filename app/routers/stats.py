@@ -1,8 +1,7 @@
 from .. import models
 from ..utils.stats_utils import get_start_date
-from fastapi import Depends, HTTPException, status, APIRouter
+from fastapi import Depends, APIRouter
 from ..database import get_db
-from datetime import datetime, timedelta, timezone
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -38,7 +37,8 @@ def get_player_picks_over_time_period(time_period: str, user_id=None, db: Sessio
     start_date = get_start_date(time_period)
 
     query = db.query(
-        func.count(func.distinct(models.PlayerPick.pack_id))).filter(models.PlayerPick.created_at >= start_date).scalar()
+        func.count(func.distinct(models.PlayerPick.pack_id))).filter(
+        models.PlayerPick.created_at >= start_date).scalar()
     
     if user_id:
         user_id = int(user_id)
