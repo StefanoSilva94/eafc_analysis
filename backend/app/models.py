@@ -33,6 +33,15 @@ class Item(Base):
     reflexes = Column(String, nullable=True)
     positioning = Column(String, nullable=True)
 
+    # Futbin cols
+    base_id = Column(String, nullable=True)
+    resource_id = Column(String, nullable=True)
+    league = Column(String, nullable=True)
+    nation = Column(String, nullable=True)
+    raretype = Column(String, nullable=True)
+    rare = Column(String, nullable=True)
+    price = Column(Integer, nullable=True)
+
     pack = relationship("Pack", back_populates="items")
 
 
@@ -72,6 +81,15 @@ class PlayerPick(Base):
     speed = Column(String, nullable=True)
     reflexes = Column(String, nullable=True)
     positioning = Column(String, nullable=True)
+
+    # Futbin cols
+    base_id = Column(String, nullable=True)
+    resource_id = Column(String, nullable=True)
+    league = Column(String, nullable=True)
+    nation = Column(String, nullable=True)
+    raretype = Column(String, nullable=True)
+    rare = Column(String, nullable=True)
+    price = Column(Integer, nullable=True)
 
     pack = relationship("Pack", back_populates="picks")
 

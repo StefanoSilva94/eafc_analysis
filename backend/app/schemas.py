@@ -28,9 +28,19 @@ class ItemBase(BaseModel):
     reflexes: Optional[str] = None
     positioning: Optional[str] = None
 
+    # Extra columns via futbin api  - non mandatory
+    base_id: Optional[str] = None
+    resource_id: Optional[str] = None
+    league: Optional[str] = None
+    nation: Optional[str] = None
+    raretype: Optional[str] = None
+    rare: Optional[str] = None
+    price: Optional[int] = None
+
 
 class ItemCreate(ItemBase):
     pass
+
 
 class PlayerPickBase(ItemBase):
     pass
@@ -48,6 +58,7 @@ class PlayerPickCreateBatch(BaseModel):
 class ItemCreateBatch(BaseModel):
     items: List[ItemCreate]
     pack_name: str
+
 
 class ItemRead(ItemBase):
     id: int

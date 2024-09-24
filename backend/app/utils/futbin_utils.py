@@ -1,10 +1,9 @@
 from curl_cffi.requests import RequestsError
 from curl_cffi import requests
+from .. import schemas
 
-BASE_URL = "https://www.futbin.org/futbin/api"
 
-
-def update_player_data_with_price(player_dict):
+def update_player_data_with_price(items_batch: schemas.ItemCreateBatch):
     """
     This recieve player_dict where each element is the player data scraped from ea fc web app.
     It will iterate through each player in the dict
@@ -14,10 +13,14 @@ def update_player_data_with_price(player_dict):
     If it is a match it will update the scraped player data with the futbin price data.
     Otherwise, it will compare to the next player
     """
+
+    BASE_URL = "https://www.futbin.org/futbin/api"
+
     # start the comparison process for each scraped player data
-    for player in player_dict.values():
-        last_name = player['name'].split(' ')[-1]
+    for player in items_batch.items:
+        last_name = player.name.split(' ')[-1]
         url = f"{BASE_URL}/searchPlayersByName?playername={last_name}"
+
         try:
             request = requests.get(url, impersonate="chrome110")
         except RequestsError as e:
@@ -40,35 +43,31 @@ def update_player_data_with_price(player_dict):
             # Now compare the player stats with stats in the player_dict
             # futbin uses outfield stat names for gk as well so ok to use 'pac' and 'dri'
             fb_stats = ['rating', 'position', 'pac', 'dri']
-            if player['position'] == 'GK':
+            if player.position == 'GK':
                 player_stats = ['rating', 'position', 'diving', 'reflexes']
             else:
                 player_stats = ['rating', 'position', 'pace', 'dribbling']
 
-            # If all the stats are the same then we have a match
-            if all(player[stat1] == fb_player[stat2] for stat1, stat2 in zip(player_stats, fb_stats)):
-                # When there is a match, save the extra column values
-                player.update({
-                    'base_id': fb_player.get('playerid'),
-                    'resource_id': fb_player.get('resource_id'),
-                    'league': fb_player.get('league'),
-                    'nation': fb_player.get('nation'),
-                    'raretype': fb_player.get('raretype'),
-                    'rare': fb_player.get('rare'),
-                    'price': fb_player.get('ps_LCPrice')
-                })
-                print(player['price'])
-                break
+                # Compare the scraped player to FUTBIN data and update if matched
+                for fb_player in fb_players:
+                    fb_stats = ['rating', 'position', 'pac', 'dri']
+                    if player.position == 'GK':
+                        fb_stats = ['rating', 'position', 'diving', 'reflexes']
 
-    return player_dict
+                    if all(getattr(player, stat1) == fb_player.get(stat2) for stat1, stat2 in
+                           zip(player_stats, fb_stats)):
+                        # Update the player with FUTBIN data
+                        player.base_id = fb_player.get('playerid')
+                        player.resource_id = fb_player.get('resource_id')
+                        player.league = fb_player.get('league')
+                        player.nation = fb_player.get('nation')
+                        player.raretype = fb_player.get('raretype')
+                        player.rare = fb_player.get('rare')
+                        if fb_player.get('ps_LCPrice') == 0:
+                            player.price = fb_player.get('ps_LCPrice')
+                        else:
+                            # If price is 0 then the player should be extinct and sell for max price
+                            player.price = fb_player.get('ps_MaxPrice')
+                        break  # Stop checking once a match is found
 
-
-
-
-data = {
-    0: {"name": 'Asun Martínez', "rating": '74', "position": 'RW', "is_tradeable": False, "pace": '84', "dribbling": '75'},
-    1: {"name": 'Maikuma', 'rating': '70', 'position': 'RB', 'is_tradeable': True, "pace": '74', "dribbling": '67'}
-}
-
-new_data = update_player_data_with_price(data)
-print(type(new_data[0]['price']))
+    return items_batch

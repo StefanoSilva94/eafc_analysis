@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from . import models, schemas
 from typing import Union
 
+
 def add_items(db: Session, item: schemas.ItemCreate):
     db_item = models.Item(**item.model_dump())
     db.add(db_item)
@@ -10,13 +11,14 @@ def add_items(db: Session, item: schemas.ItemCreate):
     return db_item
 
 
-def add_items_batch(db: Session, items_batch: Union[schemas.ItemCreateBatch, schemas.PlayerPickCreateBatch], type='pack'):
+def add_items_batch(db: Session, items_batch: Union[schemas.ItemCreateBatch, schemas.PlayerPickCreateBatch],
+                    type='pack'):
     # Create a new pack
     pack = models.Pack(pack_name=items_batch.pack_name)
     db.add(pack)
     db.commit()
     db.refresh(pack)
-    
+
     # Create items with the generated pack_id
     db_items = []
     for item in items_batch.items:

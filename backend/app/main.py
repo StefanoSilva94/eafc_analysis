@@ -32,7 +32,6 @@ app.include_router(stats.router)
 print('hello world')
 
 
-
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
