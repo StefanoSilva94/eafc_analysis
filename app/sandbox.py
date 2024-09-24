@@ -57,6 +57,15 @@ def update_player_data_with_price(player_dict):
                     'rare': fb_player.get('rare'),
                     'price': fb_player.get('ps_LCPrice')
                 })
+                p = fb_player.get('ps_LCPrice')
+                if p == 0:
+                    print("Price:")
+                    print(fb_player.get('ps_LCPrice'))
+                else:
+                    # If price is 0 then the player should be extinct and sell for max price
+
+                    print("Type: ")
+                    print(type(fb_player.get('ps_LCPrice')))
                 print(player['price'])
                 break
 
@@ -72,3 +81,4 @@ data = {
 
 new_data = update_player_data_with_price(data)
 print(type(new_data[0]['price']))
+print(type(5))

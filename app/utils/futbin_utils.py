@@ -65,10 +65,10 @@ def update_player_data_with_price(items_batch: Union[schemas.ItemCreateBatch, sc
                         player.raretype = fb_player.get('raretype')
                         player.rare = fb_player.get('rare')
                         if fb_player.get('ps_LCPrice') == 0:
-                            player.price = fb_player.get('ps_LCPrice')
+                            player.price = fb_player.get('ps_MaxPrice')
                         else:
                             # If price is 0 then the player should be extinct and sell for max price
-                            player.price = fb_player.get('ps_MaxPrice')
+                            player.price = fb_player.get('ps_LCPrice')
                         break  # Stop checking once a match is found
 
     return items_batch
