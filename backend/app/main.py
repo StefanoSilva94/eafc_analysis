@@ -29,7 +29,7 @@ app.include_router(auth.router)
 app.include_router(stats.router)
 
 
-print('hello world')
+print('hello world!')
 
 
 @app.get("/")
