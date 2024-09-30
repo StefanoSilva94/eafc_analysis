@@ -31,3 +31,8 @@ def get_user(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     
     return user
+
+
+@router.post("/proxy/get-user-id/")
+def proxy_get_user_id(user_id: int):
+    return user_id

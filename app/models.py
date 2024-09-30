@@ -1,9 +1,7 @@
 from .database import Base
-from sqlalchemy import create_engine, Boolean, Column, ForeignKey, Integer, String, TIMESTAMP
+from sqlalchemy import create_engine, Boolean, Column, ForeignKey, Integer, String, TIMESTAMP, DateTime
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import relationship
-from pydantic import EmailStr
-import datetime
 
 
 class Item(Base):
