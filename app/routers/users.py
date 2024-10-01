@@ -3,6 +3,7 @@ from .. import models, schemas
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, status, APIRouter
 from ..database import get_db
+from sqlalchemy import text
 
 
 router = APIRouter(
@@ -33,6 +34,12 @@ def get_user(id: int, db: Session = Depends(get_db)):
     return user
 
 
-@router.post("/proxy/get-user-id/")
-def proxy_get_user_id(user_id: int):
-    return user_id
+@router.post("/get-user-id/")
+def get_user_id(email: str, db: Session = Depends(get_db)):
+    # Use a raw SQL query to search for the user by email
+    result = db.execute(text("SELECT id FROM auth_user WHERE username = :email"), {"email": email}).fetchone()
+
+    # If a user is found, return the user ID, else return 0
+    if result:
+        return {"user_id": result[0]}
+    return {"user_id": 0}
