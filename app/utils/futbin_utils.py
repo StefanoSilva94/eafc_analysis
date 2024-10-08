@@ -4,6 +4,7 @@ from .. import schemas
 from typing import Union
 import pandas as pd
 
+
 def update_player_data_with_price(items_batch: Union[schemas.ItemCreateBatch, schemas.PlayerPickCreateBatch]):
     """
     This recieve player_dict where each element is the player data scraped from ea fc web app.
@@ -60,10 +61,10 @@ def update_player_data_with_price(items_batch: Union[schemas.ItemCreateBatch, sc
                 player.raretype = fb_player.get('raretype')
                 player.rare = fb_player.get('rare')
                 if fb_player.get('ps_LCPrice') == 0:
-                    player.price = fb_player.get('ps_MaxPrice')
+                    player.price = fb_player.get('ps_MaxPrice', 0)
                 else:
                     # If price is 0 then the player should be extinct and sell for max price
-                    player.price = fb_player.get('ps_LCPrice')
+                    player.price = fb_player.get('ps_LCPrice', 0)
                 break  # Stop checking once a match is found
 
     return items_batch
