@@ -48,6 +48,7 @@ class Pack(Base):
     id = Column(Integer, primary_key=True, index=True, nullable=False, autoincrement=True)
     pack_name = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=False), server_default=text('now()'))
+    pack_value = Column(Integer, nullable=True)
     items = relationship("Item", back_populates="pack")
     picks = relationship("PlayerPick", back_populates="pack")
 
