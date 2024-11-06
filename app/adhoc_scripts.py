@@ -1,4 +1,5 @@
 from curl_cffi import requests
+from json import JSONDecodeError  # Import JSONDecodeError
 
 player = "isco"
 url = f"https://www.futbin.org/futbin/api/searchPlayersByName?playername={player}"
@@ -14,7 +15,7 @@ if request.status_code == 200 and request.content:
         fb_players_data = request.json()
         fb_players = fb_players_data.get('data', [])
         print(fb_players)
-    except requests.JSONDecodeError as e:
+    except JSONDecodeError as e:
         print("JSON decoding error:", e)
 else:
     print("Failed to retrieve data or empty response")
